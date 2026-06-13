@@ -396,54 +396,57 @@ export default function AgentPage() {
   }
 
   return (
-    <div className="flex h-full w-full animate-fade-in p-6 bg-[#f8f9fa] gap-6 overflow-hidden text-slate-800">
+    <div className="flex h-full w-full animate-fade-in p-6 gap-6 overflow-hidden text-text">
       
       {/* ── LEFT SIDEBAR ── */}
       <div className="w-[320px] shrink-0 flex flex-col gap-6 overflow-y-auto scrollbar-none pb-10">
         
         {/* Agent Info Card */}
-        <div className="bg-indigo-50 border border-indigo-100/50 rounded-2xl p-5 shadow-sm relative overflow-hidden shrink-0">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-200/40 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
-          <div className="flex items-center gap-3 mb-4 relative z-10">
-            <XenoLogo className="w-12 h-12 shrink-0 object-contain rounded-xl shadow-sm" />
+        <div className="bg-gradient-to-br from-violet-500/10 to-sky-500/5 border border-white/20 rounded-2xl p-6 shadow-lg relative overflow-hidden shrink-0 backdrop-blur-xl">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-violet-400/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
+          <div className="flex items-center gap-3 mb-5 relative z-10">
+            <XenoLogo className="w-12 h-12 shrink-0 object-contain rounded-xl shadow-md bg-white p-1" />
             <div>
-              <h2 className="font-extrabold text-base tracking-tight text-indigo-900">AI Campaign Agent</h2>
-              <div className="text-[10px] font-medium text-indigo-600/80 uppercase tracking-wider mt-0.5">Autonomous Engine</div>
+              <h2 className="font-extrabold text-lg tracking-tight text-text">AI Campaign Agent</h2>
+              <div className="text-[10px] font-bold text-primary uppercase tracking-widest mt-0.5 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                Autonomous Engine
+              </div>
             </div>
           </div>
-          <p className="text-sm text-indigo-900/70 leading-relaxed relative z-10">
+          <p className="text-sm text-text-muted leading-relaxed relative z-10 font-medium">
             Describe your marketing goal in plain English. The agent will autonomously segment, draft, launch, and report.
           </p>
         </div>
 
         {/* Capabilities Card */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm shrink-0">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Capabilities</h3>
+        <div className="bg-surface/70 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-sm shrink-0 hover:shadow-md transition-shadow">
+          <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 mb-4">Capabilities</h3>
           <div className="space-y-4">
-            <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
-              <Users className="w-4 h-4 text-indigo-500" /> Customer Segmentation
+            <div className="flex items-center gap-3 text-sm font-medium text-text group">
+              <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-500 group-hover:scale-110 group-hover:bg-indigo-100 transition-all"><Users className="w-4 h-4" /></div> Customer Segmentation
             </div>
-            <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
-              <MessageSquare className="w-4 h-4 text-emerald-500" /> AI Copywriting
+            <div className="flex items-center gap-3 text-sm font-medium text-text group">
+              <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-500 group-hover:scale-110 group-hover:bg-emerald-100 transition-all"><MessageSquare className="w-4 h-4" /></div> AI Copywriting
             </div>
-            <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
-              <Zap className="w-4 h-4 text-amber-500" /> Auto Campaign Launch
+            <div className="flex items-center gap-3 text-sm font-medium text-text group">
+              <div className="p-1.5 rounded-lg bg-amber-50 text-amber-500 group-hover:scale-110 group-hover:bg-amber-100 transition-all"><Zap className="w-4 h-4" /></div> Auto Campaign Launch
             </div>
-            <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
-              <TrendingUp className="w-4 h-4 text-violet-500" /> Revenue Analytics
+            <div className="flex items-center gap-3 text-sm font-medium text-text group">
+              <div className="p-1.5 rounded-lg bg-violet-50 text-violet-500 group-hover:scale-110 group-hover:bg-violet-100 transition-all"><TrendingUp className="w-4 h-4" /></div> Revenue Analytics
             </div>
-            <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
-              <Activity className="w-4 h-4 text-rose-500" /> Segment Targeting
+            <div className="flex items-center gap-3 text-sm font-medium text-text group">
+              <div className="p-1.5 rounded-lg bg-rose-50 text-rose-500 group-hover:scale-110 group-hover:bg-rose-100 transition-all"><Activity className="w-4 h-4" /></div> Segment Targeting
             </div>
           </div>
         </div>
 
         {/* Quick Start Card */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm shrink-0">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Quick Start</h3>
+        <div className="bg-surface/70 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-sm shrink-0 hover:shadow-md transition-shadow">
+          <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 mb-4">Quick Start</h3>
           <div className="flex flex-col gap-3">
             {chipsLoading && chips.length === 0 ? (
-              [1, 2, 3].map(i => <div key={i} className="h-12 w-full bg-slate-50 animate-pulse rounded-xl shrink-0 border border-slate-100" />)
+              [1, 2, 3].map(i => <div key={i} className="h-12 w-full bg-surfaceHighlight animate-pulse rounded-xl shrink-0 border border-border" />)
             ) : (
               (chips.length > 0 ? chips : FALLBACK_CHIPS).map(chip => {
                 return (
@@ -451,7 +454,7 @@ export default function AgentPage() {
                     key={chip.prompt}
                     onClick={() => run(chip.prompt)}
                     disabled={running}
-                    className="text-left px-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-600 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors disabled:opacity-50"
+                    className="text-left px-4 py-3 bg-surface border border-border rounded-xl text-xs font-semibold text-text-muted hover:text-primary hover:border-primary/40 hover:bg-primary/5 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 disabled:opacity-50"
                   >
                     {chip.prompt}
                   </button>
@@ -466,8 +469,8 @@ export default function AgentPage() {
       <div className="flex-1 flex flex-col gap-6 min-w-0 h-full">
         
         {/* Input Card */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex-shrink-0">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Marketing Goal</h3>
+        <div className="bg-surface/70 backdrop-blur-xl border border-border rounded-2xl p-6 shadow-sm flex-shrink-0 hover:shadow-md transition-shadow">
+          <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 mb-3">Marketing Goal</h3>
           <div className="relative">
             <textarea
               ref={inputRef}
@@ -481,15 +484,15 @@ export default function AgentPage() {
               }}
               readOnly={running}
               placeholder="e.g. 'Win back customers who have not ordered in 60 days with a WhatsApp message'"
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 shadow-inner transition-all text-slate-800 placeholder:text-slate-400 resize-none h-28"
+              className="w-full bg-surface/50 border border-border rounded-xl p-5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 shadow-inner transition-all text-text placeholder:text-text-muted resize-none h-32 backdrop-blur-sm"
             />
           </div>
           <div className="flex items-center justify-between mt-4">
-            <span className="text-xs text-slate-400">Cmd + Enter to run</span>
+            <span className="text-xs font-medium text-text-muted bg-surfaceHighlight px-2.5 py-1 rounded-md border border-border">Cmd + Enter to run</span>
             <button
               onClick={() => run(input)}
               disabled={running || !input.trim()}
-              className="px-6 py-2 bg-indigo-200/50 hover:bg-indigo-200 text-indigo-700 font-semibold rounded-xl text-sm transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2.5 bg-gradient-to-r from-primary to-violet-500 hover:from-primary-hover hover:to-violet-600 text-white font-bold rounded-xl text-sm transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             >
               <Sparkles className="w-4 h-4" /> Run Agent
             </button>
@@ -497,12 +500,15 @@ export default function AgentPage() {
         </div>
 
         {/* Output Feed */}
-        <div className="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col relative">
-          <div className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+        <div className="flex-1 bg-surface/70 backdrop-blur-xl border border-border rounded-2xl shadow-sm overflow-hidden flex flex-col relative hover:shadow-md transition-shadow">
+          <div className="flex-1 overflow-y-auto p-8 space-y-8 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
             {results.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center px-4">
-                <p className="text-sm font-semibold text-slate-500">Agent output will appear here</p>
-                <p className="text-xs text-slate-400 mt-1">Type a goal on the left or pick a quick start example</p>
+                <div className="w-16 h-16 rounded-2xl bg-surfaceHighlight flex items-center justify-center mb-4 shadow-inner border border-border">
+                  <Bot className="w-8 h-8 text-text-muted opacity-50" />
+                </div>
+                <p className="text-sm font-bold text-text">Agent output will appear here</p>
+                <p className="text-xs text-text-muted mt-2">Type a goal on the top or pick a quick start example</p>
               </div>
             ) : (
               results.map(r => (

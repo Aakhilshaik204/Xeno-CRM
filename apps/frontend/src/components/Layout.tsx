@@ -95,19 +95,6 @@ export default function Layout() {
               )
             })}
           </nav>
-          
-          <div className="p-3 border-t border-border">
-            <button 
-              className={clsx(
-                "flex items-center rounded-lg font-medium text-text-muted hover:text-text hover:bg-surfaceHighlight transition-all duration-200",
-                isSidebarOpen ? "gap-3 px-3 py-2.5 w-full" : "justify-center p-2.5 w-full"
-              )}
-              title={!isSidebarOpen ? "Settings" : undefined}
-            >
-              <Settings className="w-5 h-5 shrink-0" />
-              {isSidebarOpen && <span className="whitespace-nowrap truncate">Settings</span>}
-            </button>
-          </div>
         </aside>
 
         {/* Main Content Area */}

@@ -16,6 +16,7 @@ import CreateCampaign from './pages/CreateCampaign'
 import CreateSegment from './pages/CreateSegment'
 import ErrorBoundary from './components/ErrorBoundary'
 import ChurnAlertsPage from './pages/ChurnAlertsPage'
+import SettingsPage from './pages/SettingsPage'
 
 function App() {
   return (
@@ -53,6 +54,7 @@ function App() {
             <Route path="agent" element={<AgentPage />} />
             <Route path="churn" element={<ChurnAlertsPage />} />
             <Route path="customers/:id" element={<CustomerProfile />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
         </Route>
 
