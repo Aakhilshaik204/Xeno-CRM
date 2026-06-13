@@ -19,10 +19,10 @@ import { ChartPanel } from '../components/ChartPanel'
 
 // ── Quick chips ──────────────────────────────────────────────
 const FALLBACK_CHIPS = [
-  { icon: 'TrendingUp',    label: 'Predict',   prompt: 'Predict the outcome if I send an email campaign to Gold Members' },
-  { icon: 'IndianRupee',   label: 'Revenue',    prompt: 'Generate a full revenue report for all campaigns' },
-  { icon: 'Mail',          label: 'Draft Email',prompt: 'Draft an email campaign for Gold Members offering a free accessory' },
-  { icon: 'Zap',           label: 'Segment',    prompt: 'Create a segment for customers who spent over ₹50,000' },
+  { icon: 'TrendingUp',    label: 'Predict outcome for Gold Member email',   prompt: 'Predict the outcome if I send an email campaign to Gold Members' },
+  { icon: 'IndianRupee',   label: 'Generate full revenue report',    prompt: 'Generate a full revenue report for all campaigns' },
+  { icon: 'Mail',          label: 'Draft an email for Gold Members',prompt: 'Draft an email campaign for Gold Members offering a free accessory' },
+  { icon: 'Zap',           label: 'Segment high spenders > ₹50k',    prompt: 'Create a segment for customers who spent over ₹50,000' },
 ]
 
 // ── Markdown renderer ────────────────────────────────────────
@@ -460,10 +460,54 @@ export default function AgentPage() {
         <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
           {results.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center px-4">
-              <Bot className="w-10 h-10 text-violet-300 mb-3" />
-              <h3 className="font-bold text-sm mb-1">How can I help?</h3>
-              <p className="text-xs text-text-muted">Ask me to build segments, analyze revenue, or draft campaigns.</p>
+              <Bot className="w-12 h-12 text-violet-300 mb-4" />
+              <h3 className="font-bold text-base mb-1">How can I help?</h3>
+              <p className="text-xs text-text-muted mb-8 max-w-sm">I'm your autonomous marketing assistant. I can automate campaigns, analyze data, and predict outcomes.</p>
+              
+              {/* Tools Highlight */}
+              <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
+                <div className="bg-surfaceHighlight/50 border border-border rounded-xl p-4 flex items-center gap-3 hover:bg-surfaceHighlight transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+                    <Mail className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-xs font-bold">Draft Campaigns</div>
+                    <div className="text-[10px] text-text-muted">AI Copy & Dispatch</div>
+                  </div>
+                </div>
+                
+                <div className="bg-surfaceHighlight/50 border border-border rounded-xl p-4 flex items-center gap-3 hover:bg-surfaceHighlight transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+                    <TrendingUp className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-xs font-bold">Predict ROI</div>
+                    <div className="text-[10px] text-text-muted">Estimate Conversions</div>
+                  </div>
+                </div>
+                
+                <div className="bg-surfaceHighlight/50 border border-border rounded-xl p-4 flex items-center gap-3 hover:bg-surfaceHighlight transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center shrink-0">
+                    <Users className="w-4 h-4 text-violet-600" />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-xs font-bold">Smart Segments</div>
+                    <div className="text-[10px] text-text-muted">Targeting & Filters</div>
+                  </div>
+                </div>
+                
+                <div className="bg-surfaceHighlight/50 border border-border rounded-xl p-4 flex items-center gap-3 hover:bg-surfaceHighlight transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                    <BarChart3 className="w-4 h-4 text-amber-600" />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-xs font-bold">Live Reports</div>
+                    <div className="text-[10px] text-text-muted">Revenue & Stats</div>
+                  </div>
+                </div>
+              </div>
             </div>
+
           ) : (
             results.map(r => {
               const isActive = r.id === activeResultId
