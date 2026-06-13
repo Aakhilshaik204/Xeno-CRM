@@ -1,0 +1,201 @@
+# XenoCRM: Comprehensive Developer Documentation 🚀
+
+XenoCRM is a cutting-edge, AI-powered Customer Relationship Management (CRM) platform built to automate segment creation, campaign drafting, outcome prediction, and omnichannel message dispatching. It utilizes a microservices architecture, real-time analytics, and dual-LLM integration for an unparalleled user experience.
+
+This documentation covers every detail of the application, from the database schema and background services to the AI agent integrations and complete API layer.
+
+---
+
+## 🏗️ 1. Architecture & Tech Stack
+
+The project is structured as a Turborepo monorepo with three interconnected applications.
+
+### 1.1 Frontend (`apps/frontend`)
+The user-facing web application.
+- **Framework:** React + Vite + TypeScript
+- **Styling:** Tailwind CSS + Lucide React Icons
+- **Data Visualization:** Recharts for dynamic, interactive KPI graphs and prediction analytics.
+- **Routing & State:** React Router DOM, Axios for API communication.
+- **Design System:** Custom glassmorphic UI with a premium dark/light "XenoAI" agent command center interface.
+
+### 1.2 Backend (`apps/backend`)
+The core API server that handles business logic, database operations, and primary AI orchestration.
+- **Runtime:** Node.js + Express + TypeScript
+- **Database:** Supabase (PostgreSQL) + `@supabase/supabase-js` client for database operations.
+- **Caching:** ETag generation (HTTP 304 Not Modified) for hyper-fast UI polling.
+- **AI Integration (Primary):** Google GenAI (Gemini) powers the core `XenoAI` agent for executing complex tasks via function calling.
+- **AI Integration (Secondary):** Groq API (`llama-3.1-8b-instant`) powers the ultra-fast, context-aware "Dynamic Recommendations" engine.
+- **Authentication:** Clerk middleware protects all sensitive API endpoints.
+
+### 1.3 Channel Service (`apps/channel-service`)
+An independent microservice simulating an omnichannel dispatching system.
+- **Role:** Handles the actual execution of sending messages via simulated Email, SMS, WhatsApp, and RCS protocols.
+- **Tracking:** Generates and returns realistic delivery, open, click, and conversion events via webhook back to the main backend.
+- **Delay Simulation:** Imitates real-world network latency and asynchronous email delivery pipelines.
+
+---
+
+## 🗄️ 2. Database Schema
+
+The application relies on a strictly relational PostgreSQL database hosted on Supabase, designed for massive analytical queries and atomic transaction tracking. The schema is interacted with via the Supabase Data API.
+
+### Core Models:
+
+1. **`Customer`**: The base entity.
+   - Fields: `id`, `name`, `email`, `phone`, `city`, `gender`, `birthday`
+   - Aggregates: `totalSpend`, `orderCount`, `lastOrderDate`, `membershipTier`
+   - Indexes on city, totalSpend, and lastOrderDate for ultra-fast segment filtering.
+
+2. **`Order`**: Tracks individual purchases.
+   - Fields: `id`, `amount`, `items` (JSON).
+   - Relations: Belongs to `Customer`. Has an optional `communicationId` for strict revenue attribution (ROI tracking).
+
+3. **`Segment`**: Dynamic audience groups.
+   - Fields: `name`, `filterConfig` (JSON array of rules), `customerCount`.
+   - The user or AI saves a filter (e.g., "Spend > 10000"), and the system counts matches.
+
+4. **`Campaign`**: An outgoing marketing push.
+   - Fields: `name`, `channel` (email, sms, whatsapp, rcs), `messageTemplate`, `status` (draft, sending, sent).
+   - Relations: Targets one `Segment`.
+
+5. **`Communication`**: The most critical model. Tracks individual messages per customer per campaign.
+   - Fields: `status` (queued → sent → delivered → opened → clicked → converted).
+   - Timestamps: `queuedAt`, `sentAt`, `deliveredAt`, `openedAt`, `clickedAt`, `convertedAt`.
+   - This allows granular funnel tracking for every single message sent.
+
+6. **`CampaignStats` & `SegmentStats`**:
+   - Denormalized tables updated atomically when a communication changes status. Used to quickly serve the dashboard without running expensive `COUNT(*)` queries on millions of communications.
+
+---
+
+## 🤖 3. The XenoAI Agent Ecosystem
+
+The crown jewel of XenoCRM is the **Agent Page**, an interactive command-center where users converse with the CRM. We use a **Dual-AI Architecture**.
+
+### 3.1 The Action Engine (Google Gemini 1.5)
+When a user types a prompt (e.g., *"Draft an email campaign for my Gold Members"*), Gemini processes it. We utilize **Function Calling (Tools)** to allow Gemini to execute backend code.
+
+Available Tools:
+- `getSegments`: Fetches existing segments to find the right audience.
+- `createSegment`: Builds a new JSON filter based on natural language constraints.
+- `predictCampaignOutcome`: Reads historical `SegmentStats` and `CampaignStats` to predict Open Rates, Conversions, Revenue, and Risk Level for a proposed campaign.
+- `createDraftCampaign`: Automatically writes promotional copy, creates a database draft, and calculates audience size.
+- `revenueReport` & `compareCampaigns`: Analytical tools for deep reporting.
+
+### 3.2 The Recommendation Engine (Groq Llama 3.1)
+Instead of static UI buttons, the frontend polls `/api/agent/recommendations` every 5 minutes. 
+The backend fetches the 5 most recent campaigns and segments, crafts a context prompt, and sends it to Groq. Groq (being incredibly fast) returns 8 JSON objects containing highly contextual "Action Chips" (e.g., *"Predict outcome for Diwali SMS"*). The frontend maps these to Lucide icons and renders them.
+
+### 3.3 Structured UI Responses
+When Gemini drafts a campaign, the backend doesn't just return markdown text. It returns `lastStructured: { type: 'draft', data: {...} }`. The frontend React app intercepts this and renders a beautiful, interactive **Prediction Panel** with Recharts progress bars and one-click dispatch buttons.
+
+---
+
+## ⚙️ 4. Background Services & Event Driven Logic
+
+### The Dispatcher (`apps/backend/src/services/dispatcher.ts`)
+Sending 10,000 emails cannot happen synchronously. XenoCRM implements a background queue:
+1. When a campaign is set to `sending`, the dispatcher creates `Communication` records with `status = 'queued'`.
+2. A background loop picks up batches of 50 queued communications.
+3. It POSTs them to the `Channel Service`.
+4. The Channel Service accepts them and responds `200 OK`. The backend marks them as `sent`.
+
+### Webhook Receipts (`apps/backend/src/routes/receipts.ts`)
+The Channel Service asynchronously simulates user behavior (delays, opens, clicks, conversions).
+It fires POST requests back to the backend's `/api/receipts/webhook`.
+The backend processes the webhook, updates the exact `Communication` timestamp, and atomically increments the `CampaignStats`. If the event is a `conversion`, an `Order` is automatically generated and attributed to the campaign!
+
+---
+
+## 🌐 5. Comprehensive API Endpoints
+
+The backend is built with Express Router and divided by resource. All routes (except webhooks) require Clerk Authentication.
+
+### Agent API (`/api/agent`)
+- `POST /chat` - The core Gemini conversation endpoint. Takes `prompt` and `history`. Executes tools and returns `reply`, `actions`, and `structured` data.
+- `GET /recommendations` - The Groq-powered context engine. Returns 8 dynamic action chips.
+
+### Dashboard API (`/api/dashboard`)
+- `GET /stats` - Returns aggregate metrics (Total Revenue, Active Campaigns, Total Customers, ROI). Supports ETag `304 Not Modified` caching.
+
+### Campaigns API (`/api/campaigns`)
+- `GET /` - List all campaigns.
+- `POST /` - Create a new draft campaign.
+- `GET /:id` - Get specific campaign details and `CampaignStats`.
+- `POST /:id/dispatch` - Triggers the background dispatcher for the campaign.
+- `DELETE /:id` - Deletes a campaign and its queued communications.
+
+### Segments (Audiences) API (`/api/audiences`)
+- `GET /` - List all segments.
+- `POST /` - Create a new segment.
+- `POST /preview` - Execute a dynamic Prisma query based on a JSON filter to return a live count of customers matching the rule without saving it.
+- `GET /:id` - Get segment details.
+
+### Customers API (`/api/customers`)
+- `GET /` - Paginated list of customers, searchable and filterable.
+- `GET /:id` - Full customer profile, including order history and communication timeline.
+
+### Analytics API (`/api/analytics`)
+- `GET /campaign-performance` - Time-series data for charting campaign success over time.
+- `GET /revenue-attribution` - Breakdown of revenue by channel (SMS vs Email).
+
+### Orders API (`/api/orders`)
+- `GET /` - List of recent orders.
+- `POST /` - Manually create an order (also updates customer `totalSpend`).
+
+### Communications & Webhooks
+- `GET /api/communications` - Live feed of the latest outgoing messages and their status.
+- `POST /api/receipts/webhook` - **Public endpoint**. Receives simulated events from the Channel Service to update statuses and stats.
+
+---
+
+## 🚀 6. Getting Started & Setup
+
+### Prerequisites
+- Node.js (v18+)
+- PostgreSQL Database (Supabase recommended)
+- Google Gemini API Key
+- Groq API Key
+- Clerk Publishable & Secret Keys
+
+### Installation & Execution
+
+1. **Install dependencies** at the monorepo root:
+   ```bash
+   npm install
+   ```
+
+2. **Environment Variables**:
+   Create `.env` files in the respective apps.
+   **Backend (`apps/backend/.env`)**:
+   ```env
+   DATABASE_URL="postgresql://..."
+   DIRECT_URL="postgresql://..."
+   GEMINI_API_KEY="..."
+   GROQ_API_KEY="gsk_..."
+   CLERK_SECRET_KEY="sk_test_..."
+   ```
+   **Frontend (`apps/frontend/.env`)**:
+   ```env
+   VITE_CLERK_PUBLISHABLE_KEY="pk_test_..."
+   VITE_API_URL="http://localhost:3001"
+   ```
+
+3. **Database Migration**:
+   If needed, push your schema to Supabase directly from the SQL editor or through your preferred migration tool, as we rely on the Supabase JS client for actual querying.
+
+4. **Run the ecosystem concurrently**:
+   Open three terminal tabs and start the services:
+   ```bash
+   # Terminal 1: Backend API
+   cd apps/backend && npm run dev
+   
+   # Terminal 2: Channel Service (Simulator)
+   cd apps/channel-service && npm run dev
+   
+   # Terminal 3: Frontend Web App
+   cd apps/frontend && npm run dev
+   ```
+
+5. **Access the App**:
+   Navigate to `http://localhost:3000` to see XenoCRM in action!

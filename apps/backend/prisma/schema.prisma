@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Customer ─────────────────────────────────────────────────────────────────
+
+model Customer {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  phone         String
+  city          String
+  gender        String    // male | female | other
+  birthday      DateTime?
+  createdAt     DateTime  @default(now())
+
+  // Denormalised aggregates (updated on order creation)
+  totalSpend    Float     @default(0)
+  orderCount    Int       @default(0)
+  lastOrderDate DateTime?
+  membershipTier String   @default("None") // Platinum, Gold, Silver, None
+
+  // Relations
+  orders        Order[]
+  communications Communication[]
+
+  @@index([city])
+  @@index([totalSpend])
+  @@index([lastOrderDate])
+  @@index([createdAt])
+}
+
+// ─── Order ────────────────────────────────────────────────────────────────────
+
+model Order {
+  id              String   @id @default(cuid())
+  customerId      String
+  amount          Float
+  items           Json     // OrderItem[]
+  createdAt       DateTime @default(now())
+
+  // Conversion tracking: which campaign communication led to this order
+  communicationId String?
+
+  // Relations
+  customer        Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  communication   Communication? @relation(fields: [communicationId], references: [id], onDelete: SetNull)
+
+  @@index([customerId])
+  @@index([communicationId])
+  @@index([createdAt])
+}
+
+// ─── Segment ──────────────────────────────────────────────────────────────────
+
+model Segment {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  filterConfig  Json      // FilterRule[]
+  customerCount Int       @default(0)
+  createdBy     String    @default("user") // user | ai
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  campaigns     Campaign[]
+  stats         SegmentStats?
+}
+
+// ─── Campaign ─────────────────────────────────────────────────────────────────
+
+model Campaign {
+  id              String    @id @default(cuid())
+  name            String
+  segmentId       String
+  channel         String    // whatsapp | sms | email | rcs
+  messageTemplate String
+  status          String    @default("draft") // draft | sending | sent | completed
+  scheduledAt     DateTime?
+  createdAt       DateTime  @default(now())
+  createdBy       String?   // Clerk userId
+
+  // Relations
+  segment         Segment         @relation(fields: [segmentId], references: [id])
+  communications  Communication[]
+  stats           CampaignStats?
+
+  @@index([segmentId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ─── Communication ────────────────────────────────────────────────────────────
+// One record per customer per campaign. Tracks the full lifecycle.
+
+model Communication {
+  id          String   @id @default(cuid())
+  campaignId  String
+  customerId  String
+  channel     String   // whatsapp | sms | email | rcs
+  message     String
+
+  // State machine: queued → sent → delivered → opened → read → clicked → converted | failed
+  status      String   @default("queued")
+
+  // Timestamp for each status transition
+  queuedAt    DateTime  @default(now())
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  openedAt    DateTime?
+  readAt      DateTime?
+  clickedAt   DateTime?
+  failedAt    DateTime?
+  convertedAt DateTime?
+
+  // Extra info: failure reason, click URL, conversion order ID + revenue
+  metadata    Json?
+
+  // Relations
+  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  orders      Order[]   // Orders attributed to this communication
+
+  @@index([campaignId])
+  @@index([customerId])
+  @@index([status])
+}
+
+// ─── CampaignStats ────────────────────────────────────────────────────────────
+// Aggregated counters per campaign. Incremented atomically on each receipt.
+
+model CampaignStats {
+  id          String  @id @default(cuid())
+  campaignId  String  @unique
+
+  total       Int     @default(0)
+  sent        Int     @default(0)
+  delivered   Int     @default(0)
+  failed      Int     @default(0)
+  opened      Int     @default(0)
+  read        Int     @default(0)
+  clicked     Int     @default(0)
+  converted   Int     @default(0)
+  revenue     Float   @default(0)
+
+  // Relation
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+}
+
+// ─── SegmentStats ─────────────────────────────────────────────────────────────
+// Aggregated performance of a segment across ALL campaigns that targeted it.
+
+model SegmentStats {
+  id               String  @id @default(cuid())
+  segmentId        String  @unique
+
+  campaignCount    Int     @default(0)
+  totalReach       Int     @default(0)
+  avgOpenRate      Float   @default(0)
+  avgClickRate     Float   @default(0)
+  totalConversions Int     @default(0)
+  totalRevenue     Float   @default(0)
+
+  // Relation
+  segment          Segment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+}
