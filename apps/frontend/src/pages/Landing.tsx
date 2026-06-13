@@ -1,6 +1,7 @@
 import { Sparkles, ArrowRight, BarChart3, Users, Send, Zap, Shield, Brain, TrendingUp, CheckCircle, Star, ChevronRight } from 'lucide-react'
 import { SignInButton } from '@clerk/clerk-react'
 import { useEffect, useRef, useState } from 'react'
+import { XenoLogo } from '../components/XenoLogo'
 
 const STATS = [
   { value: '500+', label: 'Customers Managed' },
@@ -175,9 +176,7 @@ export default function Landing() {
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto w-full">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-sm">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
+            <XenoLogo className="w-8 h-8 shadow-sm" />
             <span className="text-lg font-bold tracking-tight">XenoCRM</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-text-muted">
@@ -205,10 +204,7 @@ export default function Landing() {
         <div className="absolute top-20 right-0 w-[400px] h-[400px] bg-gradient-to-br from-amber-100/50 to-transparent rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col items-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-50 text-violet-600 border border-violet-200 text-sm font-semibold mb-8 animate-slide-up shadow-sm">
-            <Sparkles className="w-4 h-4" />
-            Powered by Google Gemini AI
-          </div>
+
 
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1] animate-slide-up" style={{ animationDelay: '100ms' }}>
             The CRM built for<br />
@@ -410,9 +406,7 @@ export default function Landing() {
       <footer className="py-10 border-t border-border bg-surface">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
-            </div>
+            <XenoLogo className="w-7 h-7" />
             <span className="font-bold">XenoCRM</span>
           </div>
           <p className="text-text-muted text-sm">© 2026 XenoCRM. Built with Maison Luxe OS.</p>
