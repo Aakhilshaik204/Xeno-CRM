@@ -286,6 +286,8 @@ CHANNELS: Use exactly: "whatsapp", "sms", "email", "rcs"
 
 PREDICTION: When a user asks "what will happen if I send X to Y" or "predict outcome" or "will this campaign work", call predictCampaignOutcome tool to generate intelligent predictions based on past similar campaigns.
 
+DRAFTING CAMPAIGNS (CRITICAL TOOL CHAINING): When the user asks to draft a campaign, you MUST call 'createDraftCampaign'. If you don't know the segmentId, you must FIRST call 'getSegments' or 'createSegment', wait for the result, and then IMMEDIATELY call 'createDraftCampaign'. Do not stop until the campaign is drafted!
+
 TARGETING SPECIFIC CUSTOMERS: If the user mentions a specific person's name (e.g., "Lucas Davis", "Ava Garcia", "message this customer"), you MUST follow these exact steps:
   1. Call 'searchCustomers' to find their customer ID.
   2. Call 'targetCustomers' with their ID to create the campaign.
