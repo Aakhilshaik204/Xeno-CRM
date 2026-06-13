@@ -11,7 +11,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
 // Define Tools
 const getSegmentsTool = {
   name: 'getSegments',
-  description: 'Gets a list of all customer segments and their IDs. Use this to find the right segmentId when the user asks to target a specific audience.',
+  description: 'Gets a list of all customer segments and their IDs. Use this to find the right segmentId when the user asks to target a specific audience. CRITICAL: This tool automatically renders a datagrid in the UI. DO NOT call renderDataGrid yourself when using this tool, or you will overwrite the real data with hallucinations.',
   parameters: {
     type: Type.OBJECT,
     properties: {},
