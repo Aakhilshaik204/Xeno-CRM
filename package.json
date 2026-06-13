@@ -1,6 +1,7 @@
 {
   "name": "xenocrm",
   "private": true,
+  "packageManager": "npm@10.8.1",
   "workspaces": [
     "apps/*",
     "packages/*"
