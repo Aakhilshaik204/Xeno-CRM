@@ -7,10 +7,17 @@ import SignInPage from './pages/SignIn.tsx'
 import SignUpPage from './pages/SignUp.tsx'
 import './index.css'
 
+import axios from 'axios'
+
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
 if (!PUBLISHABLE_KEY) {
   console.warn("Missing Publishable Key")
+}
+
+// Ensure all Axios requests point to the Render backend, not Vercel
+if (import.meta.env.VITE_API_URL) {
+  axios.defaults.baseURL = import.meta.env.VITE_API_URL
 }
 
 function ClerkProviderWithRoutes() {
