@@ -11,7 +11,7 @@ export default function Layout() {
   const { user } = useUser()
   const location = useLocation()
   const [churningCount, setChurningCount] = useState(0)
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   useEffect(() => {
     axios.get('/api/customer-health/overview')
@@ -126,8 +126,8 @@ export default function Layout() {
           </header>
 
           {/* Page Content */}
-          <div className={clsx("flex-1 overflow-auto z-10", location.pathname === '/agent' ? 'p-0' : 'p-8')}>
-            <div className={clsx("mx-auto animate-slide-up h-full", location.pathname === '/agent' ? 'max-w-none' : 'max-w-6xl')}>
+          <div className={clsx("flex-1 overflow-auto z-10 w-full", location.pathname === '/agent' ? 'p-0' : 'p-8')}>
+            <div className="mx-auto animate-slide-up h-full w-full">
               <Outlet />
             </div>
           </div>
