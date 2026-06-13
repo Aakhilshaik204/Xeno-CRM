@@ -1,45 +1,33 @@
-# XenoCRM Channel Service 📡
+# XenoCRM Channel Service Simulator
 
-An independent microservice simulating an omnichannel dispatching system (Email, SMS, WhatsApp, RCS). It isolates the simulated delivery logic from the core backend.
+The Channel Service is an independent microservice designed to simulate the asynchronous, real-world behavior of external communication providers (like SendGrid, Twilio, or Meta API).
 
-## 🚀 Tech Stack
+## 🎯 Purpose
 
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Language**: TypeScript
+In a real CRM, when you send 10,000 emails, they don't immediately reach the customer. They go into a queue, get delivered over hours, and users slowly open, click, and purchase over the following days.
 
-## ✨ Key Responsibilities
+This service perfectly simulates that lifecycle so that XenoCRM's analytics dashboards and funnel tracking work realistically during demonstrations.
 
-1. **Batch Dispatching (`/api/dispatch`)**
-   - Accepts large payloads of communications from the core XenoCRM backend.
-   - Returns a `200 OK` immediately to free up the backend dispatcher.
+## 🏗️ How it Works
 
-2. **Realistic Funnel Simulation**
-   - Asynchronously creates delays and network latency to simulate real-world message delivery pipelines.
-   - Generates sequential webhook events: `sent` ➔ `delivered` ➔ `opened` ➔ `clicked` ➔ `converted`.
-   - Injects realistic failure rates (e.g., bounced emails, dead numbers).
-   - Simulates revenue generated from `converted` events using weighted random algorithms.
+1. **Acceptance:** The main backend POSTs an array of messages to `/api/send`. The Channel Service immediately returns `200 OK` (simulating successful ingestion).
+2. **Lifecycle Simulation:** For each message, the service spins up asynchronous timeouts to simulate delays:
+   - **Delivery:** Simulated latency between 1 to 5 seconds.
+   - **Opens:** If a message "opens" (based on random probability weighted by channel type), it fires an open event 5 to 15 seconds later.
+   - **Clicks:** If opened, it might "click" 10 to 30 seconds later.
+   - **Conversions:** If clicked, the customer might "buy" 20 to 60 seconds later.
+3. **Webhook Dispatch:** When an event occurs, the Channel Service fires a POST request back to the main backend's webhook URL (`http://localhost:3001/api/receipts/webhook`), including the `communicationId` and `event` type.
 
-3. **Webhook Callbacks**
-   - Once simulated events occur in memory, the service fires HTTP POST requests back to the core backend (`/api/receipts/webhook`) containing the timestamp, status, and metadata.
+## 📊 Channel Characteristics
 
-## 🛠️ Setup & Development
+The service simulates different behaviors for different channels:
+- **Email:** Average delivery, decent open rate, standard click rate.
+- **SMS:** Extremely fast delivery, very high open rate, lower click rate.
+- **WhatsApp:** Fast delivery, high open rate, high conversion rate.
+- **RCS:** Rich media results in high engagement and the highest conversion rate.
 
-### Environment Variables
-*(Optional if running on default ports)*
-Create a `.env` file in the `channel-service` directory:
-```env
-PORT=3002
-BACKEND_WEBHOOK_URL="http://localhost:3001/api/receipts/webhook"
-```
+## 🚀 Getting Started
 
-### Running Locally
-```bash
-# Install dependencies
-npm install
-
-# Start the simulator service
-npm run dev
-```
-
-The channel service runs on `http://localhost:3002`.
+1. No specific environment variables are strictly required, though you can adjust the target webhook URL if necessary.
+2. Run `npm install`
+3. Run `npm run dev` to start the simulation server on port 3002.

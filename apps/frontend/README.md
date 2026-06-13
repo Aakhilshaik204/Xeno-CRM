@@ -1,65 +1,46 @@
-# XenoCRM Frontend 🌐
+# XenoCRM Frontend
 
-This is the user-facing web application for XenoCRM. It is a highly interactive, premium CRM dashboard built with modern web technologies, featuring AI-driven tools, real-time campaign tracking, and extensive data visualization.
+This is the user-facing web application for XenoCRM, providing a premium "Maison Luxe" interface for managing customers, segments, and campaigns via an autonomous AI agent.
 
-## 🚀 Tech Stack
+## 🏗️ Architecture & Libraries
 
-- **Framework**: React 18
-- **Build Tool**: Vite
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS + custom glassmorphic design system
-- **Routing**: React Router DOM v6
-- **Data Fetching**: Axios
-- **Icons**: Lucide React
-- **Data Visualization**: Recharts
-- **Authentication**: Clerk React SDK
+- **Framework:** React 18 + Vite + TypeScript
+- **Routing:** React Router v6
+- **Styling:** Tailwind CSS (v3) + Lucide React for iconography
+- **State Management:** React `useState`/`useEffect` + Axios for API communication
+- **Authentication:** `@clerk/clerk-react`
+- **Charts:** Recharts for responsive, interactive data visualization
+- **Animations:** Custom Tailwind keyframes (`animate-fade-in`, `animate-slide-up`, `animate-pulse-slow`)
 
-## 📁 Directory Structure
+## 📂 Directory Structure
 
-```text
-src/
-├── components/       # Reusable UI components (KPI cards, Modals, Badges)
-├── pages/            # Top-level route components (Dashboard, Agent, Campaigns, etc.)
-├── lib/              # Utility functions, API clients, and constants
-├── types/            # TypeScript interface definitions
-├── index.css         # Global Tailwind configuration and custom CSS variables
-└── main.tsx          # Application entry point & React Router setup
-```
+- `src/components/`: Reusable UI elements.
+  - `Layout.tsx`: The main application shell (sidebar, topbar, background).
+  - `AIAssistant.tsx`: The globally accessible floating AI chat widget.
+  - `XenoLogo.tsx`: The core brand logo component.
+- `src/pages/`: Route-level components.
+  - `AgentPage.tsx`: The crown jewel of the app. A master-detail execution layout where the user speaks to the Gemini AI to draft campaigns and segments.
+  - `Dashboard.tsx`: High-level metrics and health scores.
+  - `Campaigns.tsx`, `Audiences.tsx`, `Analytics.tsx`: Specific CRM functional views.
+  - `Landing.tsx`: Public-facing marketing page.
+- `src/App.tsx`: Route definitions and authentication wrapping.
+- `src/main.tsx`: Entry point and Clerk provider setup.
 
-## ✨ Key Features
+## 🎨 Design System (Maison Luxe OS)
 
-1. **The XenoAI Agent Page (`/agent`)**
-   - The core conversational interface where users can interact with the dual-AI system.
-   - Features dynamic "Action Chips" powered by Groq Llama 3.1 that recommend contextual prompts.
-   - Renders structured UI components (like the `CampaignPreview`) natively within the chat stream when the AI uses backend tools.
+The frontend utilizes a custom "glassmorphic" design system to convey luxury and advanced technology. 
+- **Colors:** Deep indigos, slate grays, and a custom primary blue/violet gradient.
+- **Glassmorphism:** Heavy use of `bg-surface/50 backdrop-blur-xl border-border` to create frosted glass panels that float over a textured background.
+- **Micro-interactions:** Buttons and cards feature `hover:-translate-y-0.5 hover:shadow-md transition-all` for a buttery-smooth, responsive feel.
 
-2. **Real-time Campaign Dashboard (`/campaigns/:id`)**
-   - Displays live funnel metrics tracking message delivery, opens, clicks, and conversions.
-   - Includes a terminal-style "Live Simulation Feed" to watch outgoing message events stream in real-time.
+## 🤖 AI Integrations
 
-3. **Audience Segmentation (`/audiences`)**
-   - A visual query builder allowing users to create dynamic customer segments.
-   - Predicts audience sizes instantly using debounced API calls.
+The frontend integrates heavily with the backend's AI capabilities:
+1. **Agent Page Feed:** Unlike traditional chat, the `AgentPage.tsx` renders structured deliverables (like data grids, charts, and campaign previews) inline within the conversation feed, allowing one-click execution.
+2. **Dynamic Recommendations (Groq):** The frontend polls for context-aware suggestions every 5 minutes to guide the user on what to do next.
 
-4. **Clerk Authentication**
-   - Secure login and session management out-of-the-box. Routes are protected and require a valid session to access the CRM data.
+## 🚀 Getting Started
 
-## 🛠️ Setup & Development
-
-### Environment Variables
-Create a `.env` file in the root of the `frontend` directory:
-```env
-VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
-VITE_API_URL=http://localhost:3001
-```
-
-### Running Locally
-```bash
-# Install dependencies (from monorepo root or frontend dir)
-npm install
-
-# Start the Vite development server
-npm run dev
-```
-
-The frontend will be available at `http://localhost:3000`.
+1. Set up your `.env` file with `VITE_CLERK_PUBLISHABLE_KEY` and `VITE_API_URL` (usually `http://localhost:3001`).
+2. Run `npm install`
+3. Run `npm run dev` to start the Vite development server on port 3000.

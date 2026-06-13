@@ -1,70 +1,49 @@
-# XenoCRM Backend ⚙️
+# XenoCRM Backend Core API
 
-The core API server and AI orchestration engine for XenoCRM. It handles all database operations, dual-AI execution, background job queuing, and API requests from the frontend.
+This is the central nervous system of XenoCRM. It handles all database transactions, authentication verification, background dispatching, and AI model orchestration.
 
-## 🚀 Tech Stack
+## 🏗️ Architecture & Libraries
 
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Language**: TypeScript
-- **Database**: Supabase (PostgreSQL) + `@supabase/supabase-js`
-- **Primary AI**: Google GenAI (Gemini 1.5) for complex reasoning and function calling.
-- **Secondary AI**: Groq (Llama 3.1 8b) for ultra-fast, context-aware dynamic recommendations.
-- **Authentication**: `@clerk/clerk-sdk-node`
+- **Runtime:** Node.js + Express + TypeScript
+- **Database Client:** `@supabase/supabase-js` interacting with PostgreSQL
+- **AI Clients:** `@google/genai` (Gemini 1.5) and `groq-sdk` (Llama 3.1)
+- **Auth:** `@clerk/express` for protecting routes
 
-## 📁 Directory Structure
+## 📂 Core Modules
 
-```text
-src/
-├── routes/           # Express route controllers (agent, dashboard, campaigns, etc.)
-├── services/         # Background workers and business logic (dispatcher)
-├── lib/              # Database clients and AI initialization
-├── types/            # TypeScript interfaces
-└── index.ts          # Express server entry point
-```
+### 1. The Agent Service (`src/services/agent.ts`)
+This is the most complex service in the application. It initializes the Gemini model and provides it with a strict set of **Tools** (Function Calling). 
+When the user sends a prompt, Gemini can decide to:
+- Call `getSegments` or `createSegment`
+- Call `predictCampaignOutcome` to run a heuristic math algorithm estimating open/click rates.
+- Call `createDraftCampaign` to save a draft to the database and format a structured response for the frontend UI.
+- Read analytics via `revenueReport`.
 
-## ✨ Key Features
+### 2. The Recommendation Engine (`src/services/recommendation.ts`)
+A separate, ultra-fast pipeline using Groq and Llama 3.1. It reads the recent state of the database (latest campaigns, segments) and generates 8 context-aware suggestions formatted as JSON.
 
-1. **Dual-AI Architecture**
-   - **Gemini Agent (`routes/agent.ts`)**: Powers the `XenoAI` conversational assistant. It has access to severe backend "tools" (Function Calling) like `createDraftCampaign`, `predictCampaignOutcome`, `searchCustomers`, and `targetCustomers`.
-   - **Groq Engine (`routes/agent.ts`)**: Generates rapid, highly-contextual "Action Chips" based on the user's latest campaigns and segments.
+### 3. The Dispatcher (`src/services/dispatcher.ts`)
+A background loop that simulates an asynchronous job queue. 
+- It scans the `communications` table for `status = 'queued'`.
+- It groups them into batches and sends POST requests to the `channel-service`.
+- Upon successful transmission, it marks them as `sent`.
 
-2. **Background Dispatcher (`services/dispatcher.ts`)**
-   - Safely processes outbound campaign communications in batches of 50.
-   - Connects to the external `channel-service` to simulate actual message delivery over the network, decoupling the API layer from heavy dispatch loops.
+### 4. Webhook Receiver (`src/routes/receipts.ts`)
+Listens for simulated real-world events (delivered, opened, clicked, converted) from the `channel-service`. 
+When a conversion event is received, this route automatically generates a new `Order` in the database and attributes the revenue to the corresponding campaign.
 
-3. **Webhook Processing (`routes/receipts.ts`)**
-   - Receives massive throughput of webhooks from the `channel-service`.
-   - Atomically updates granular communication states (sent, delivered, opened, clicked, converted) and aggregates campaign-level stats instantly.
-   - Automatically attributes generated revenue back to the campaign if a conversion event fires.
+## 🗄️ Database Schema
 
-4. **Performance Optimized**
-   - Uses ETag generation (`HTTP 304 Not Modified`) on heavy endpoints like `/api/dashboard/stats` to allow rapid UI polling without database strain.
+The backend directly manipulates a rich relational schema:
+- `customers` (demographics, LTV)
+- `orders` (purchases, attributed to campaigns)
+- `segments` (dynamic audience filters saved as JSON logic)
+- `campaigns` (marketing blasts)
+- `communications` (granular, per-customer message tracking)
+- `campaign_stats` / `segment_stats` (denormalized rollups for fast querying)
 
-## 🛠️ Setup & Development
+## 🚀 Getting Started
 
-### Environment Variables
-Create a `.env` file in the root of the `backend` directory:
-```env
-# Database Connections
-DATABASE_URL="postgresql://..."
-DIRECT_URL="postgresql://..."
-
-# AI APIs
-GEMINI_API_KEY="..."
-GROQ_API_KEY="gsk_..."
-
-# Authentication
-CLERK_SECRET_KEY="sk_test_..."
-```
-
-### Running Locally
-```bash
-# Install dependencies
-npm install
-
-# Start the server with hot-reload (tsx)
-npm run dev
-```
-
-The backend server runs on `http://localhost:3001`.
+1. Create a `.env` file with your `DATABASE_URL`, `DIRECT_URL`, `GEMINI_API_KEY`, `GROQ_API_KEY`, and `CLERK_SECRET_KEY`.
+2. Run `npm install`
+3. Run `npm run dev` to start the server on port 3001.

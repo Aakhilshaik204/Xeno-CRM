@@ -109,43 +109,129 @@ The backend processes the webhook, updates the exact `Communication` timestamp, 
 
 ## 🌐 5. Comprehensive API Endpoints
 
-The backend is built with Express Router and divided by resource. All routes (except webhooks) require Clerk Authentication.
+The backend is built with Express Router. All routes except `/api/receipts/webhook` require a valid Clerk Authentication token in the `Authorization: Bearer <token>` header.
 
-### Agent API (`/api/agent`)
-- `POST /chat` - The core Gemini conversation endpoint. Takes `prompt` and `history`. Executes tools and returns `reply`, `actions`, and `structured` data.
-- `GET /recommendations` - The Groq-powered context engine. Returns 8 dynamic action chips.
+### 🤖 Agent API (`/api/agent`)
 
-### Dashboard API (`/api/dashboard`)
-- `GET /stats` - Returns aggregate metrics (Total Revenue, Active Campaigns, Total Customers, ROI). Supports ETag `304 Not Modified` caching.
+**`POST /chat`**  
+The core Gemini conversation endpoint.
+- **Request:** `{ "prompt": "Draft an email", "history": [{ "role": "user", "content": "..." }] }`
+- **Response:** `{ "reply": "...", "actions": [...], "structured": { "type": "draft", "data": {...} } }`
 
-### Campaigns API (`/api/campaigns`)
-- `GET /` - List all campaigns.
-- `POST /` - Create a new draft campaign.
-- `GET /:id` - Get specific campaign details and `CampaignStats`.
-- `POST /:id/dispatch` - Triggers the background dispatcher for the campaign.
-- `DELETE /:id` - Deletes a campaign and its queued communications.
+**`GET /recommendations`**  
+Fetches contextual Groq-powered action chips.
+- **Response:** `{ "recommendations": [{ "prompt": "...", "type": "...", "context": "..." }] }`
 
-### Segments (Audiences) API (`/api/audiences`)
-- `GET /` - List all segments.
-- `POST /` - Create a new segment.
-- `POST /preview` - Execute a dynamic Prisma query based on a JSON filter to return a live count of customers matching the rule without saving it.
-- `GET /:id` - Get segment details.
+---
 
-### Customers API (`/api/customers`)
-- `GET /` - Paginated list of customers, searchable and filterable.
-- `GET /:id` - Full customer profile, including order history and communication timeline.
+### 📊 Dashboard API (`/api/dashboard`)
 
-### Analytics API (`/api/analytics`)
-- `GET /campaign-performance` - Time-series data for charting campaign success over time.
-- `GET /revenue-attribution` - Breakdown of revenue by channel (SMS vs Email).
+**`GET /stats`**  
+Returns high-level application metrics. Supports ETag caching.
+- **Response:** 
+```json
+{
+  "totalRevenue": 1500000,
+  "activeCampaigns": 12,
+  "totalCustomers": 5430,
+  "roi": "+24%"
+}
+```
 
-### Orders API (`/api/orders`)
-- `GET /` - List of recent orders.
-- `POST /` - Manually create an order (also updates customer `totalSpend`).
+---
 
-### Communications & Webhooks
-- `GET /api/communications` - Live feed of the latest outgoing messages and their status.
-- `POST /api/receipts/webhook` - **Public endpoint**. Receives simulated events from the Channel Service to update statuses and stats.
+### 📢 Campaigns API (`/api/campaigns`)
+
+**`GET /`**  
+List all campaigns.
+- **Response:** `[{ "id": "...", "name": "...", "status": "sent", "channel": "email" }]`
+
+**`POST /`**  
+Create a new draft campaign.
+- **Request:** `{ "name": "...", "channel": "...", "messageTemplate": "...", "segmentId": "..." }`
+- **Response:** `{ "id": "...", "status": "draft" }`
+
+**`GET /:id`**  
+Get specific campaign details including stats.
+- **Response:** `{ "campaign": {...}, "stats": { "sent": 100, "opened": 50, "revenue": 5000 } }`
+
+**`POST /:id/dispatch`**  
+Triggers the background dispatcher for a draft campaign.
+- **Response:** `{ "message": "Dispatch started", "queuedCount": 1000 }`
+
+**`DELETE /:id`**  
+Deletes a campaign and its queued communications.
+
+---
+
+### 🎯 Segments (Audiences) API (`/api/audiences`)
+
+**`GET /`**  
+List all segments.
+- **Response:** `[{ "id": "...", "name": "...", "customerCount": 5000 }]`
+
+**`POST /`**  
+Create a new segment.
+- **Request:** `{ "name": "...", "filterConfig": [{ "field": "totalSpend", "operator": "gt", "value": 1000 }] }`
+- **Response:** `{ "id": "...", "customerCount": 450 }`
+
+**`POST /preview`**  
+Preview segment size without saving.
+- **Request:** `{ "filterConfig": [...] }`
+- **Response:** `{ "count": 450 }`
+
+**`GET /:id`**  
+Get segment details and associated customers.
+
+---
+
+### 👥 Customers API (`/api/customers`)
+
+**`GET /`**  
+Paginated list of customers.
+- **Query Params:** `?page=1&limit=50&search=john`
+- **Response:** `{ "data": [{ "name": "John", ... }], "total": 1000 }`
+
+**`GET /:id`**  
+Full customer profile.
+- **Response:** `{ "profile": {...}, "orders": [...], "communications": [...] }`
+
+---
+
+### 📈 Analytics API (`/api/analytics`)
+
+**`GET /campaign-performance`**  
+Time-series data for charting.
+- **Response:** `[{ "date": "2023-10-01", "revenue": 5000, "opens": 150 }]`
+
+**`GET /revenue-attribution`**  
+Breakdown of revenue by channel.
+- **Response:** `[{ "channel": "email", "revenue": 100000 }, { "channel": "whatsapp", "revenue": 50000 }]`
+
+---
+
+### 🛒 Orders API (`/api/orders`)
+
+**`GET /`**  
+List of recent orders.
+- **Response:** `[{ "id": "...", "amount": 150, "customerId": "..." }]`
+
+**`POST /`**  
+Manually create an order.
+- **Request:** `{ "customerId": "...", "amount": 150, "items": [...] }`
+
+---
+
+### 📡 Communications & Webhooks
+
+**`GET /api/communications`**  
+Live feed of outgoing messages.
+- **Response:** `[{ "id": "...", "status": "delivered", "customerName": "..." }]`
+
+**`POST /api/receipts/webhook`**  
+**Public endpoint.** Receives simulated events from the Channel Service.
+- **Request:** `{ "communicationId": "...", "event": "opened", "timestamp": "..." }`
+- **Response:** `200 OK`
 
 ---
 
