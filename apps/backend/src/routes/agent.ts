@@ -34,7 +34,7 @@ const createSegmentTool = {
           properties: {
             field: { type: Type.STRING, description: 'Field name (totalSpend, orderCount, daysSinceLastOrder, membershipTier, city, gender)' },
             operator: { type: Type.STRING, description: '"equals", "gte", or "lte"' },
-            value: { type: Type.STRING, description: 'The value to match' }
+            value: { type: Type.STRING, description: 'The value to match. VALID TIERS: "Platinum", "Gold", "Silver", "None". VALID GENDER: "male", "female".' }
           }
         }
       }
@@ -336,7 +336,11 @@ When presenting data: always highlight the most important insight first.`,
             message: [{
               functionResponse: {
                 name: 'getSegments',
-                response: { success: true, message: "Segments rendered in datagrid on the right canvas. Please provide a brief 1-sentence text summary of the segments available. Do NOT print a table." }
+                response: { 
+                  success: true, 
+                  segments: (segments || []).map((s: any) => ({ name: s.name, id: s.id, count: s.customerCount })),
+                  message: "Segments rendered in datagrid on the right canvas. Please provide a brief 1-sentence text summary of the segments available. Do NOT print a table." 
+                }
               }
             }]
           })
