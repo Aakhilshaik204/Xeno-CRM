@@ -16,6 +16,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell
 } from 'recharts'
 import { ChartPanel } from '../components/ChartPanel'
+import { XenoLogo } from '../components/XenoLogo'
 
 // ── Quick chips ──────────────────────────────────────────────
 const FALLBACK_CHIPS = [
@@ -434,9 +435,7 @@ export default function AgentPage() {
         {/* Header */}
         <div className="p-4 border-b border-border bg-surfaceHighlight/30 flex items-center justify-between z-10">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-sky-500 flex items-center justify-center shadow-sm">
-              <Sparkle className="w-4 h-4 text-white" />
-            </div>
+            <XenoLogo className="w-8 h-8 shadow-sm" />
             <div>
               <h2 className="font-extrabold text-base tracking-tight">XenoAI</h2>
               <div className="flex items-center gap-1.5 text-[10px] text-text-muted font-medium">
@@ -460,7 +459,7 @@ export default function AgentPage() {
         <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
           {results.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center px-4">
-              <Bot className="w-12 h-12 text-violet-300 mb-4" />
+              <XenoLogo className="w-12 h-12 mb-4 shadow-[0_0_20px_rgba(11,122,240,0.3)] rounded-[14px]" />
               <h3 className="font-bold text-base mb-1">How can I help?</h3>
               <p className="text-xs text-text-muted mb-8 max-w-sm">I'm your autonomous marketing assistant. I can automate campaigns, analyze data, and predict outcomes.</p>
               

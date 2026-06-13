@@ -5,6 +5,7 @@ import clsx from 'clsx'
 import AIAssistant from './AIAssistant'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { XenoLogo } from './XenoLogo'
 
 export default function Layout() {
   const { user } = useUser()
@@ -35,9 +36,7 @@ export default function Layout() {
         <aside className="w-64 flex flex-col border-r border-border bg-surface/50 backdrop-blur-xl">
           <div className="h-16 flex items-center px-6 border-b border-border">
             <h1 className="text-xl font-bold text-primary tracking-tight flex items-center gap-2">
-              <div className="w-6 h-6 rounded-md bg-gradient-to-br from-primary to-amber-600 flex items-center justify-center">
-                <span className="text-black text-xs font-black">X</span>
-              </div>
+              <XenoLogo className="w-6 h-6" />
               XenoCRM
             </h1>
           </div>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import axios from 'axios'
-import { Sparkles, Send, X, Loader2 } from 'lucide-react'
+import { Send, X, Loader2 } from 'lucide-react'
+import { XenoLogo } from './XenoLogo'
 
 export default function AIAssistant() {
   const [isOpen, setIsOpen] = useState(false)
@@ -41,9 +42,9 @@ export default function AIAssistant() {
       {/* Floating Action Button */}
       <button 
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-8 right-8 p-4 bg-primary text-black rounded-full shadow-[0_0_20px_rgba(234,179,8,0.4)] hover:shadow-[0_0_30px_rgba(234,179,8,0.6)] transition-all z-50 ${isOpen ? 'scale-0' : 'scale-100'}`}
+        className={`fixed bottom-8 right-8 shadow-[0_0_20px_rgba(11,122,240,0.4)] hover:shadow-[0_0_30px_rgba(11,122,240,0.6)] hover:-translate-y-1 transition-all z-50 rounded-[14px] ${isOpen ? 'scale-0' : 'scale-100'}`}
       >
-        <Sparkles className="w-6 h-6" />
+        <XenoLogo className="w-14 h-14" />
       </button>
 
       {/* Chat Window */}
@@ -52,7 +53,7 @@ export default function AIAssistant() {
         {/* Header */}
         <div className="p-4 border-b border-border bg-surfaceHighlight flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
+            <XenoLogo className="w-5 h-5" />
             <h3 className="font-semibold text-text">Maison Luxe AI</h3>
           </div>
           <button onClick={() => setIsOpen(false)} className="text-text-muted hover:text-text transition-colors">
@@ -64,7 +65,7 @@ export default function AIAssistant() {
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 && (
             <div className="text-center text-text-muted mt-10">
-              <Sparkles className="w-8 h-8 mx-auto mb-3 opacity-50" />
+              <XenoLogo className="w-10 h-10 mx-auto mb-3 opacity-90" />
               <p className="text-sm">Hi! I can help you create campaigns, find segments, and analyze data.</p>
               <div className="space-y-2 mt-4 text-sm text-text-muted">
                 <p>Try asking:</p>
@@ -86,8 +87,8 @@ export default function AIAssistant() {
                   <div className="flex flex-col gap-2 mb-2 w-full">
                     {m.actions.map((action, idx) => (
                       <div key={idx} className="flex flex-col bg-surface border border-border rounded-lg overflow-hidden shadow-sm">
-                        <div className="flex items-center gap-1.5 text-[10px] text-primary bg-surfaceHighlight/50 px-2 py-1.5 border-b border-border">
-                          <Sparkles className="w-3 h-3" />
+                        <div className="flex items-center gap-1.5 text-[10px] text-[#0b7af0] bg-surfaceHighlight/50 px-2 py-1.5 border-b border-border">
+                          <XenoLogo className="w-3 h-3" />
                           <span className="font-semibold">{action.name}</span>
                         </div>
                         <div className="p-2 bg-black/40 text-[9px] font-mono text-text-muted overflow-x-auto whitespace-pre">
