@@ -1,33 +1,90 @@
-# XenoCRM Channel Service Simulator
+# XenoCRM Channel Service (Simulator)
 
-The Channel Service is an independent microservice designed to simulate the asynchronous, real-world behavior of external communication providers (like SendGrid, Twilio, or Meta API).
+The Channel Service is an independent Node.js/Express microservice. Its sole purpose is to simulate the asynchronous, chaotic, and delayed nature of real-world communication providers (like SendGrid for Email, Twilio for SMS, Meta for WhatsApp, or Google for RCS).
 
-## 🎯 Purpose
+---
 
-In a real CRM, when you send 10,000 emails, they don't immediately reach the customer. They go into a queue, get delivered over hours, and users slowly open, click, and purchase over the following days.
+## 🎯 The Problem it Solves
 
-This service perfectly simulates that lifecycle so that XenoCRM's analytics dashboards and funnel tracking work realistically during demonstrations.
+In a real production CRM, when you dispatch a campaign to 10,000 users, the following happens:
+1. The provider accepts the payload immediately.
+2. It takes minutes/hours to actually deliver the messages to handsets/inboxes.
+3. Users open the messages hours later (or never).
+4. Users click links minutes after opening.
+5. Users purchase items (convert) minutes/hours after clicking.
 
-## 🏗️ How it Works
+To demonstrate XenoCRM's powerful funnel tracking, analytics, and ROI attribution without actually sending real messages, the Channel Service perfectly imitates this lifecycle.
 
-1. **Acceptance:** The main backend POSTs an array of messages to `/api/send`. The Channel Service immediately returns `200 OK` (simulating successful ingestion).
-2. **Lifecycle Simulation:** For each message, the service spins up asynchronous timeouts to simulate delays:
-   - **Delivery:** Simulated latency between 1 to 5 seconds.
-   - **Opens:** If a message "opens" (based on random probability weighted by channel type), it fires an open event 5 to 15 seconds later.
-   - **Clicks:** If opened, it might "click" 10 to 30 seconds later.
-   - **Conversions:** If clicked, the customer might "buy" 20 to 60 seconds later.
-3. **Webhook Dispatch:** When an event occurs, the Channel Service fires a POST request back to the main backend's webhook URL (`http://localhost:3001/api/receipts/webhook`), including the `communicationId` and `event` type.
+---
 
-## 📊 Channel Characteristics
+## 🏗️ Technical Architecture
 
-The service simulates different behaviors for different channels:
-- **Email:** Average delivery, decent open rate, standard click rate.
-- **SMS:** Extremely fast delivery, very high open rate, lower click rate.
-- **WhatsApp:** Fast delivery, high open rate, high conversion rate.
-- **RCS:** Rich media results in high engagement and the highest conversion rate.
+- **Runtime:** Node.js + Express
+- **Concurrency:** Relies heavily on Node's non-blocking Event Loop (`setTimeout`) to manage thousands of simultaneous simulated lifecycles without crashing.
+- **Stateless:** The service does not have a database. It holds the simulation timers in memory and forgets about them once the final webhook is fired.
 
-## 🚀 Getting Started
+---
 
-1. No specific environment variables are strictly required, though you can adjust the target webhook URL if necessary.
+## ⚙️ The Simulation Lifecycle
+
+When the main backend sends a payload to `POST /api/send`, the Channel Service responds with `200 OK` instantly, then begins the simulation cascade in the background.
+
+### 1. Delivery Phase
+Every message has a guaranteed delivery, but with varying latency.
+- **Latency:** Random delay between `1,000ms` and `5,000ms`.
+- **Action:** Fires a `delivered` webhook.
+
+### 2. Open Phase
+If the message was delivered, the system calculates a probability based on the channel type.
+- **Math:** `Math.random() < CHANNEL_PROBABILITIES[channel].open`
+- **Latency:** Random delay between `5,000ms` and `15,000ms`.
+- **Action:** Fires an `opened` webhook.
+
+### 3. Click Phase
+If the message was opened, calculate click probability.
+- **Math:** `Math.random() < CHANNEL_PROBABILITIES[channel].click`
+- **Latency:** Random delay between `10,000ms` and `30,000ms`.
+- **Action:** Fires a `clicked` webhook.
+
+### 4. Conversion Phase
+If the message was clicked, calculate conversion (purchase) probability.
+- **Math:** `Math.random() < CHANNEL_PROBABILITIES[channel].conversion`
+- **Latency:** Random delay between `20,000ms` and `60,000ms`.
+- **Action:** Fires a `converted` webhook.
+
+---
+
+## 📊 Channel Probabilities
+
+Different channels exhibit vastly different engagement metrics. The simulator uses hardcoded weights to reflect reality:
+
+| Channel | Open Rate | Click Rate | Conversion Rate |
+| :--- | :--- | :--- | :--- |
+| **Email** | 30% | 15% | 5% |
+| **SMS** | 95% | 20% | 8% |
+| **WhatsApp**| 90% | 35% | 15% |
+| **RCS** | 85% | 40% | 18% |
+
+*Because of these weights, sending a WhatsApp campaign in XenoCRM will result in visibly higher ROI on the dashboard compared to an Email campaign!*
+
+---
+
+## 📡 Webhook Dispatching
+
+When a timer triggers an event, the service constructs a payload:
+```json
+{
+  "communicationId": "uuid-from-database",
+  "event": "opened",
+  "timestamp": "2023-10-01T12:00:00Z"
+}
+```
+It then POSTs this directly to the main backend's public endpoint (`http://localhost:3001/api/receipts/webhook`). If the backend is down, the webhook silently fails (fire-and-forget).
+
+---
+
+## 🚀 Development Setup
+
+1. Ensure the main backend is running on port 3001 (or update the webhook URL target in `src/index.ts`).
 2. Run `npm install`
-3. Run `npm run dev` to start the simulation server on port 3002.
+3. Run `npm run dev` to start the simulator on port 3002.
