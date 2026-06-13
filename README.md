@@ -32,26 +32,34 @@ graph TD
 ### 🧠 XenoAI Agent Execution Flow
 
 ```mermaid
-sequenceDiagram
-    participant User
-    participant Frontend
-    participant Backend
-    participant DB
-    participant Gemini
-
-    User->>Frontend: "Draft a VIP Campaign"
-    Frontend->>Backend: POST /api/agent/chat
-    Backend->>Gemini: Send prompt + System Context
-    Gemini-->>Backend: Tool Call: getSegments()
-    Backend->>DB: Query Segments
-    DB-->>Backend: Return VIP Segment
-    Backend-->>Gemini: Tool Result
-    Gemini-->>Backend: Tool Call: createDraftCampaign()
-    Backend->>DB: Insert Draft
-    Backend-->>Gemini: Tool Result
-    Gemini-->>Backend: Final Text + JSON Structured Data
-    Backend-->>Frontend: { reply, structured: { type: 'draft' } }
-    Frontend->>User: Renders Text + Interactive Recharts Prediction Panel
+graph TD
+    User([User Prompt]) -->|POST /api/agent/chat| API[Express API]
+    API -->|Prompt + System Context| Gemini{Gemini 1.5 Pro Engine}
+    
+    Gemini -->|Needs Data/Action?| ToolRouter{Tool Router}
+    
+    subgraph Available Agent Tools
+        ToolRouter -->|Query Audiences| getSegments[getSegments]
+        ToolRouter -->|Build Filter logic| createSegment[createSegment]
+        ToolRouter -->|Math Heuristics| predict[predictCampaignOutcome]
+        ToolRouter -->|Save to DB| draft[createDraftCampaign]
+        ToolRouter -->|Calculate ROI| revenue[revenueReport]
+    end
+    
+    getSegments --> DB[(Supabase DB)]
+    createSegment --> DB
+    predict --> DB
+    draft --> DB
+    revenue --> DB
+    
+    DB -->|Raw SQL Results| Format[Data Formatter]
+    Format -->|Tool Result JSON| Gemini
+    
+    Gemini -->|Final Analysis| Output{Structured Output}
+    
+    Output -->|type: 'draft'| UI1[React: Interactive Prediction Panel]
+    Output -->|type: 'segment'| UI2[React: Audience Data Grid]
+    Output -->|type: 'text'| UI3[React: Standard Chat Bubble]
 ```
 
 ### 1.1 Frontend (`apps/frontend`)
