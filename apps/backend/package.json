@@ -4,12 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
+    "build": "echo 'Build skipped (using tsx)'",
+    "start": "tsx src/index.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "db:seed": "ts-node seed.ts"
+    "db:seed": "tsx seed.ts"
   },
   "dependencies": {
     "@google/genai": "^2.8.0",
@@ -18,11 +18,13 @@
     "@xenocrm/shared-types": "*",
     "axios": "^1.7.2",
     "cors": "^2.8.5",
+    "date-fns": "^3.6.0",
     "express": "^4.19.2",
     "express-async-handler": "^1.2.0",
     "helmet": "^7.1.0",
     "morgan": "^1.10.0",
     "p-queue": "^8.0.1",
+    "tsx": "^4.15.0",
     "uuid": "^10.0.0",
     "ws": "^8.21.0"
   },

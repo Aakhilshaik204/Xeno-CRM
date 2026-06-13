@@ -1,6 +1,4 @@
 import { PrismaClient } from '@prisma/client'
-import { buildPrismaWhereClause } from './services/segmentFilter'
-
 const prisma = new PrismaClient()
 
 async function main() {
