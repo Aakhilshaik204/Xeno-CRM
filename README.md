@@ -10,6 +10,50 @@ This documentation covers every detail of the application, from the database sch
 
 The project is structured as a Turborepo monorepo with three interconnected applications.
 
+### 🗺️ System Architecture Diagram
+
+```mermaid
+graph TD
+    Client[React Frontend] -->|REST API + JWT| Backend[Express Backend]
+    Backend -->|Raw SQL| DB[(Supabase PostgreSQL)]
+    
+    subgraph Event Driven Lifecycle
+        Backend -->|Bulk POST /api/send| Channel[Channel Simulator]
+        Channel -.->|Delayed Simulation| Channel
+        Channel -->|Webhook /api/receipts/webhook| Backend
+    end
+    
+    subgraph Dual AI Ecosystem
+        Backend <-->|Function Calling| Gemini[Google Gemini 1.5 Pro]
+        Backend <-->|Fast JSON Polling| Groq[Groq Llama 3.1]
+    end
+```
+
+### 🧠 XenoAI Agent Execution Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Backend
+    participant DB
+    participant Gemini
+
+    User->>Frontend: "Draft a VIP Campaign"
+    Frontend->>Backend: POST /api/agent/chat
+    Backend->>Gemini: Send prompt + System Context
+    Gemini-->>Backend: Tool Call: getSegments()
+    Backend->>DB: Query Segments
+    DB-->>Backend: Return VIP Segment
+    Backend-->>Gemini: Tool Result
+    Gemini-->>Backend: Tool Call: createDraftCampaign()
+    Backend->>DB: Insert Draft
+    Backend-->>Gemini: Tool Result
+    Gemini-->>Backend: Final Text + JSON Structured Data
+    Backend-->>Frontend: { reply, structured: { type: 'draft' } }
+    Frontend->>User: Renders Text + Interactive Recharts Prediction Panel
+```
+
 ### 1.1 Frontend (`apps/frontend`)
 The user-facing web application.
 - **Framework:** React + Vite + TypeScript
