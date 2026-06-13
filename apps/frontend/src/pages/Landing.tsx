@@ -336,15 +336,17 @@ export default function Landing() {
               { icon: Zap, title: '1-Click Dispatch', desc: 'Reviews safety constraints, targets the exact audience, and safely queues your entire campaign with a single command.' },
               { icon: BarChart3, title: 'Live Data Grids', desc: 'Instantly generates beautiful, interactive data tables and charts when you ask for specific marketing reports.' },
               { icon: HeartPulse, title: 'Churn Monitoring', desc: 'Constantly watches your audience data in the background and alerts you the moment VIPs show signs of churning.' },
-            ].map((skill, i) => (
+            ].map((skill, i) => {
+              const Icon = skill.icon
+              return (
               <div key={i} className="bg-surface/60 backdrop-blur-md border border-border rounded-2xl p-8 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-100 to-sky-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <skill.icon className="w-6 h-6 text-violet-600" />
+                  <Icon className="w-6 h-6 text-violet-600" />
                 </div>
                 <h3 className="text-xl font-bold mb-3">{skill.title}</h3>
                 <p className="text-text-muted leading-relaxed">{skill.desc}</p>
               </div>
-            ))}
+            )})}
           </div>
         </div>
       </section>
