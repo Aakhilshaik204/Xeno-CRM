@@ -11,6 +11,7 @@ export default function Layout() {
   const { user } = useUser()
   const location = useLocation()
   const [churningCount, setChurningCount] = useState(0)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
   useEffect(() => {
     axios.get('/api/customer-health/overview')
@@ -33,15 +34,27 @@ export default function Layout() {
     <SignedIn>
       <div className="flex h-screen overflow-hidden bg-background">
         {/* Sidebar */}
-        <aside className="w-64 flex flex-col border-r border-border bg-surface/50 backdrop-blur-xl">
-          <div className="h-16 flex items-center px-6 border-b border-border">
-            <h1 className="text-xl font-bold text-primary tracking-tight flex items-center gap-2">
-              <XenoLogo className="w-6 h-6" />
-              XenoCRM
-            </h1>
+        <aside className={clsx(
+          "flex flex-col border-r border-border bg-surface/50 backdrop-blur-xl transition-all duration-300 ease-in-out",
+          isSidebarOpen ? "w-64" : "w-16"
+        )}>
+          <div 
+            className="h-16 flex items-center px-4 border-b border-border cursor-pointer hover:bg-surfaceHighlight/50 transition-colors"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            title="Toggle Sidebar"
+          >
+            <div className="flex items-center gap-3 overflow-hidden w-full whitespace-nowrap">
+              <XenoLogo className="w-8 h-8 shrink-0" />
+              <h1 className={clsx(
+                "text-xl font-bold text-primary tracking-tight transition-opacity duration-300",
+                isSidebarOpen ? "opacity-100" : "opacity-0 w-0"
+              )}>
+                XenoCRM
+              </h1>
+            </div>
           </div>
           
-          <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+          <nav className="flex-1 py-6 px-2 space-y-1 overflow-y-auto scrollbar-none overflow-x-hidden">
             {navItems.map((item) => {
               const Icon = item.icon
               const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path))
@@ -51,31 +64,48 @@ export default function Layout() {
                   key={item.label}
                   to={item.path}
                   className={clsx(
-                    'flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-all duration-200 group relative',
+                    'flex items-center p-2.5 rounded-lg font-medium transition-all duration-200 group relative',
+                    isSidebarOpen ? 'gap-3 px-3' : 'justify-center',
                     isActive 
                       ? 'text-primary bg-primary/10' 
                       : 'text-text-muted hover:text-text hover:bg-surfaceHighlight'
                   )}
+                  title={!isSidebarOpen ? item.label : undefined}
                 >
                   {isActive && (
                     <div className="absolute left-0 w-1 h-5 bg-primary rounded-r-full shadow-[0_0_10px_rgba(234,179,8,0.5)]"></div>
                   )}
-                  <Icon className={clsx('w-5 h-5 transition-transform duration-200', isActive ? 'scale-110' : 'group-hover:scale-110')} />
-                  {item.label}
-                  {(item as any).badge > 0 && (
-                    <span className="ml-auto flex items-center justify-center w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-bold animate-pulse">
-                      {(item as any).badge > 9 ? '9+' : (item as any).badge}
-                    </span>
+                  <Icon className={clsx('w-5 h-5 shrink-0 transition-transform duration-200', isActive ? 'scale-110' : 'group-hover:scale-110')} />
+                  
+                  {isSidebarOpen && (
+                    <>
+                      <span className="whitespace-nowrap truncate">{item.label}</span>
+                      {(item as any).badge > 0 && (
+                        <span className="ml-auto flex items-center justify-center w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-bold animate-pulse shrink-0">
+                          {(item as any).badge > 9 ? '9+' : (item as any).badge}
+                        </span>
+                      )}
+                    </>
+                  )}
+
+                  {!isSidebarOpen && (item as any).badge > 0 && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
                   )}
                 </Link>
               )
             })}
           </nav>
           
-          <div className="p-4 border-t border-border">
-            <button className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg font-medium text-text-muted hover:text-text hover:bg-surfaceHighlight transition-colors duration-200">
-              <Settings className="w-5 h-5" />
-              Settings
+          <div className="p-3 border-t border-border">
+            <button 
+              className={clsx(
+                "flex items-center rounded-lg font-medium text-text-muted hover:text-text hover:bg-surfaceHighlight transition-all duration-200",
+                isSidebarOpen ? "gap-3 px-3 py-2.5 w-full" : "justify-center p-2.5 w-full"
+              )}
+              title={!isSidebarOpen ? "Settings" : undefined}
+            >
+              <Settings className="w-5 h-5 shrink-0" />
+              {isSidebarOpen && <span className="whitespace-nowrap truncate">Settings</span>}
             </button>
           </div>
         </aside>

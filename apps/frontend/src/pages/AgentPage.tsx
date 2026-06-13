@@ -399,16 +399,16 @@ export default function AgentPage() {
     <div className="flex h-full w-full animate-fade-in p-6 bg-[#f8f9fa] gap-6 overflow-hidden text-slate-800">
       
       {/* ── LEFT SIDEBAR ── */}
-      <div className="w-[320px] flex-shrink-0 flex flex-col gap-6 overflow-y-auto scrollbar-none pb-10">
+      <div className="w-[320px] shrink-0 flex flex-col gap-6 overflow-y-auto scrollbar-none pb-10">
         
         {/* Agent Info Card */}
-        <div className="bg-indigo-50 border border-indigo-100/50 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+        <div className="bg-indigo-50 border border-indigo-100/50 rounded-2xl p-5 shadow-sm relative overflow-hidden shrink-0">
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-200/40 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
           <div className="flex items-center gap-3 mb-4 relative z-10">
-            <XenoLogo className="w-10 h-10 shadow-sm" />
+            <XenoLogo className="w-12 h-12 shrink-0 object-contain rounded-xl shadow-sm" />
             <div>
               <h2 className="font-extrabold text-base tracking-tight text-indigo-900">AI Campaign Agent</h2>
-              <div className="text-[10px] font-medium text-indigo-600/80 uppercase tracking-wider">Autonomous Engine</div>
+              <div className="text-[10px] font-medium text-indigo-600/80 uppercase tracking-wider mt-0.5">Autonomous Engine</div>
             </div>
           </div>
           <p className="text-sm text-indigo-900/70 leading-relaxed relative z-10">
@@ -417,7 +417,7 @@ export default function AgentPage() {
         </div>
 
         {/* Capabilities Card */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm shrink-0">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Capabilities</h3>
           <div className="space-y-4">
             <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
@@ -439,7 +439,7 @@ export default function AgentPage() {
         </div>
 
         {/* Quick Start Card */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm shrink-0">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Quick Start</h3>
           <div className="flex flex-col gap-3">
             {chipsLoading && chips.length === 0 ? (
