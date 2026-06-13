@@ -78,10 +78,13 @@ const dispatchCampaignTool = {
     properties: {
       campaignId: {
         type: Type.STRING,
-        description: 'The exact ID of the campaign to dispatch.'
+        description: 'Optional. The exact ID of the campaign to dispatch.'
+      },
+      campaignName: {
+        type: Type.STRING,
+        description: 'Optional. The name of the campaign to dispatch if ID is unknown.'
       }
-    },
-    required: ['campaignId']
+    }
   }
 }
 
@@ -466,10 +469,24 @@ When presenting data: always highlight the most important insight first.`,
             }]
           })
         } else if (call.name === 'dispatchCampaign') {
-          const { campaignId } = call.args as any
+          let { campaignId, campaignName } = call.args as any
+          
+          if (!campaignId && campaignName) {
+            const cleanName = campaignName.replace(/["']/g, '').trim()
+            const { data } = await supabase.from('Campaign').select('id').ilike('name', `%${cleanName}%`).order('createdAt', { ascending: false }).limit(1).single()
+            if (data) campaignId = data.id
+          }
+
+          if (!campaignId) {
+             response = await chat.sendMessage({
+               message: [{ functionResponse: { name: 'dispatchCampaign', response: { error: 'Could not find the specified campaign to dispatch. Did you create it first?' } } }]
+             })
+             continue
+          }
+
           actions.push({
             name: 'dispatchCampaign',
-            description: `Dispatching campaign ${campaignId}...`,
+            description: `Dispatching campaign ${campaignName || campaignId}...`,
             args: call.args || {}
           })
 

@@ -119,8 +119,17 @@ export default function Dashboard() {
     )
   }
 
-  if (!data) return null
-
+  if (!data || !data.metrics) {
+    return (
+      <div className="flex flex-col items-center justify-center h-96 text-center space-y-4">
+        <AlertTriangle className="w-12 h-12 text-red-500" />
+        <h3 className="text-xl font-bold">API Connection Failed</h3>
+        <p className="text-text-muted max-w-md">
+          The dashboard couldn't connect to the backend. Please ensure you have set the <code>VITE_API_URL</code> environment variable in Vercel to your Render backend URL, and then trigger a new deployment.
+        </p>
+      </div>
+    )
+  }
   const { metrics, channelsUsed, campaignReach, customerTiers, recentCampaigns } = data
 
   return (

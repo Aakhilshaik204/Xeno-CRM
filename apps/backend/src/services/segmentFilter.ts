@@ -24,7 +24,11 @@ export function applySupabaseFilters(query: any, filterConfig: FilterRule[]): an
       }
     } else {
       if (rule.operator === 'equals' || rule.operator === 'eq') {
-        query = query.eq(rule.field, rule.value)
+        if (typeof rule.value === 'string') {
+          query = query.ilike(rule.field, rule.value)
+        } else {
+          query = query.eq(rule.field, rule.value)
+        }
       } else if (rule.operator === 'in') {
         // If value is an array, we pass it as a comma-separated string for Supabase .in()
         // Or if the Supabase client handles arrays natively, we just pass the array

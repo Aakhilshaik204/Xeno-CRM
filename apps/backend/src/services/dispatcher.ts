@@ -92,7 +92,7 @@ export async function dispatchCampaign(campaignId: string) {
           }
 
           try {
-            await axios.post(`${CHANNEL_SERVICE_URL}/send`, payload, { timeout: 5000 })
+            await axios.post(`${CHANNEL_SERVICE_URL}/send`, payload, { timeout: 60000 })
           } catch (e: any) {
             console.error(`Failed to dispatch comm ${comm.id} to channel service:`, e.message)
             await supabase.from('Communication').update({
