@@ -1,4 +1,4 @@
-import { Sparkles, ArrowRight, BarChart3, Users, Send, Zap, Shield, Brain, TrendingUp, CheckCircle, Star, ChevronRight } from 'lucide-react'
+import { Sparkles, ArrowRight, BarChart3, Users, Send, Zap, Shield, Brain, TrendingUp, CheckCircle, Star, ChevronRight, MessageSquare, HeartPulse } from 'lucide-react'
 import { SignInButton } from '@clerk/clerk-react'
 import { useEffect, useRef, useState } from 'react'
 import { XenoLogo } from '../components/XenoLogo'
@@ -307,6 +307,45 @@ export default function Landing() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {FEATURES.map((f, i) => <FeatureCard key={f.title} feature={f} index={i} />)}
+        </div>
+      </section>
+
+      {/* ── Agent Skills ── */}
+      <section className="py-28 px-6 border-t border-border bg-gradient-to-b from-surface to-surfaceHighlight/30 relative overflow-hidden">
+        {/* Glow effect */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-violet-400/10 blur-[100px] rounded-full pointer-events-none" />
+        
+        <div className="max-w-7xl mx-auto w-full relative z-10">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-50 text-violet-600 border border-violet-200 text-sm font-semibold mb-6">
+              <Brain className="w-4 h-4" /> Autonomous Intelligence
+            </div>
+            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+              Meet your AI Campaign Agent
+            </h2>
+            <p className="text-text-muted text-lg max-w-2xl mx-auto">
+              It doesn't just suggest — it executes. From data crunching to copy drafting, your agent handles the heavy lifting 24/7.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { icon: Users, title: 'Natural Language Segments', desc: 'Type "find big spenders who stopped buying" and the agent automatically builds the complex database query.' },
+              { icon: TrendingUp, title: 'Predictive ROI Engine', desc: 'Simulates thousands of past campaigns to estimate your open rates, conversions, and exact revenue.' },
+              { icon: MessageSquare, title: 'Omnichannel Drafting', desc: 'Generates tailored copy perfectly formatted for Email, SMS, or WhatsApp in your brand\\'s unique voice.' },
+              { icon: Zap, title: '1-Click Dispatch', desc: 'Reviews safety constraints, targets the exact audience, and safely queues your entire campaign with a single command.' },
+              { icon: BarChart3, title: 'Live Data Grids', desc: 'Instantly generates beautiful, interactive data tables and charts when you ask for specific marketing reports.' },
+              { icon: HeartPulse, title: 'Churn Monitoring', desc: 'Constantly watches your audience data in the background and alerts you the moment VIPs show signs of churning.' },
+            ].map((skill, i) => (
+              <div key={i} className="bg-surface/60 backdrop-blur-md border border-border rounded-2xl p-8 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-100 to-sky-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <skill.icon className="w-6 h-6 text-violet-600" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">{skill.title}</h3>
+                <p className="text-text-muted leading-relaxed">{skill.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

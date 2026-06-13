@@ -42,9 +42,9 @@ export default function AIAssistant() {
       {/* Floating Action Button */}
       <button 
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-8 right-8 shadow-[0_0_20px_rgba(11,122,240,0.4)] hover:shadow-[0_0_30px_rgba(11,122,240,0.6)] hover:-translate-y-1 transition-all z-50 rounded-[14px] ${isOpen ? 'scale-0' : 'scale-100'}`}
+        className={`fixed bottom-8 right-8 shadow-[0_0_20px_rgba(11,122,240,0.4)] hover:shadow-[0_0_30px_rgba(11,122,240,0.6)] hover:-translate-y-1 transition-all z-50 rounded-full overflow-hidden ${isOpen ? 'scale-0' : 'scale-100'}`}
       >
-        <XenoLogo className="w-14 h-14" />
+        <XenoLogo className="w-14 h-14 rounded-full object-cover" />
       </button>
 
       {/* Chat Window */}
