@@ -76,15 +76,12 @@ const dispatchCampaignTool = {
   parameters: {
     type: Type.OBJECT,
     properties: {
-      campaignId: {
-        type: Type.STRING,
-        description: 'Optional. The exact ID of the campaign to dispatch.'
-      },
       campaignName: {
         type: Type.STRING,
-        description: 'Optional. The name of the campaign to dispatch if ID is unknown.'
+        description: 'The exact name of the campaign to dispatch. Extract this from the user prompt.'
       }
-    }
+    },
+    required: ['campaignName']
   }
 }
 
@@ -469,9 +466,10 @@ When presenting data: always highlight the most important insight first.`,
             }]
           })
         } else if (call.name === 'dispatchCampaign') {
-          let { campaignId, campaignName } = call.args as any
+          const { campaignName } = call.args as any
+          let campaignId = null
           
-          if (!campaignId && campaignName) {
+          if (campaignName) {
             const cleanName = campaignName.replace(/["']/g, '').trim()
             const { data } = await supabase.from('Campaign').select('id').ilike('name', `%${cleanName}%`).order('createdAt', { ascending: false }).limit(1).single()
             if (data) campaignId = data.id
@@ -486,7 +484,7 @@ When presenting data: always highlight the most important insight first.`,
 
           actions.push({
             name: 'dispatchCampaign',
-            description: `Dispatching campaign ${campaignName || campaignId}...`,
+            description: `Dispatching campaign "${campaignName}"...`,
             args: call.args || {}
           })
 
