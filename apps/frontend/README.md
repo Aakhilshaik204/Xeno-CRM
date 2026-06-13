@@ -15,6 +15,25 @@ Welcome to the comprehensive frontend documentation for XenoCRM. This package co
 - **Authentication:** `@clerk/clerk-react`. Clerk components (`<SignedIn>`, `<SignedOut>`, `<UserButton>`) handle session management seamlessly.
 - **Data Visualization:** Recharts is used for dynamic, interactive KPI graphs, campaign reach charts, and AI prediction analytics.
 
+### 🗺️ Component Architecture
+
+```mermaid
+graph TD
+    App[App Router / ClerkAuth] --> Layout[Layout Shell]
+    Layout --> Sidebar[Sidebar Nav]
+    Layout --> Topbar[Topbar User/Status]
+    Layout --> Pages{Route Content}
+    Layout --> AIAssistant[Floating AI Assistant]
+    
+    Pages --> Dashboard[Dashboard Metrics]
+    Pages --> Campaigns[Campaigns CRUD]
+    Pages --> Audiences[Audiences Builder]
+    Pages --> AgentPage[Agent Page Engine]
+    
+    AgentPage --> Recharts[Recharts Interactive Graphs]
+    AgentPage --> Actions[Dynamic Dispatch Actions]
+```
+
 ---
 
 ## 📂 Deep-Dive Directory Structure

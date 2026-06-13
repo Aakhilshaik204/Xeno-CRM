@@ -14,6 +14,32 @@ Welcome to the core API documentation for XenoCRM. This Express.js application i
   - `@google/genai` (Gemini 1.5 Pro/Flash) for complex reasoning and function calling.
   - `groq-sdk` (Llama 3.1 8B) for ultra-low latency contextual generation.
 
+### 🗺️ Microservice Architecture
+
+```mermaid
+graph TD
+    Client[React Frontend] -->|REST| API[Express API Router]
+    API --> Clerk[Clerk Auth Middleware]
+    Clerk --> Controllers{Controllers}
+    
+    Controllers --> AgentC[Agent Routes]
+    Controllers --> AnalyticsC[Analytics Routes]
+    Controllers --> CampaignC[Campaign Routes]
+    
+    AgentC --> Gemini[Gemini 1.5 Service]
+    AgentC --> Groq[Groq Llama 3.1 Service]
+    
+    CampaignC --> DB[(Supabase PostgreSQL)]
+    
+    subgraph Background Services
+        Dispatcher[Campaign Dispatcher Loop]
+        Dispatcher -->|Fetch Queued| DB
+        Dispatcher -->|Bulk Dispatch| Channel[Channel Service]
+    end
+    
+    Webhook[POST /api/receipts/webhook] --> DB
+```
+
 ---
 
 ## 📂 Deep-Dive Directory Structure

@@ -23,6 +23,28 @@ To demonstrate XenoCRM's powerful funnel tracking, analytics, and ROI attributio
 - **Concurrency:** Relies heavily on Node's non-blocking Event Loop (`setTimeout`) to manage thousands of simultaneous simulated lifecycles without crashing.
 - **Stateless:** The service does not have a database. It holds the simulation timers in memory and forgets about them once the final webhook is fired.
 
+### 🗺️ Simulation Architecture
+
+```mermaid
+graph TD
+    Inbound[POST /api/send] --> MemoryQueue[In-Memory Event Queue]
+    
+    MemoryQueue --> Delay1{Delivery Latency Timer}
+    Delay1 -->|1-5s| Webhook1[Webhook: Delivered]
+    
+    Delay1 --> Prob1{Open Probability?}
+    Prob1 -->|Yes| Delay2{Open Latency Timer}
+    Delay2 -->|5-15s| Webhook2[Webhook: Opened]
+    
+    Delay2 --> Prob2{Click Probability?}
+    Prob2 -->|Yes| Delay3{Click Latency Timer}
+    Delay3 -->|10-30s| Webhook3[Webhook: Clicked]
+    
+    Delay3 --> Prob3{Conversion Probability?}
+    Prob3 -->|Yes| Delay4{Conversion Latency Timer}
+    Delay4 -->|20-60s| Webhook4[Webhook: Converted]
+```
+
 ---
 
 ## ⚙️ The Simulation Lifecycle
