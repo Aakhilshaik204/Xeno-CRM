@@ -35,14 +35,16 @@ graph TD
     subgraph APILayer
         AuthMiddleware[Clerk Auth Middleware]
         Routers[Express Routers]
+        AgentTools[Agent Tool Router]
         Mutex[PQueue Mutex]
         Dispatcher[Campaign Dispatcher]
         
         AuthMiddleware --> Routers
+        Routers --> AgentTools
         Routers --> Mutex
         Routers --> Dispatcher
     end
-    class AuthMiddleware,Routers,Mutex,Dispatcher backend;
+    class AuthMiddleware,Routers,AgentTools,Mutex,Dispatcher backend;
 
     subgraph DatabaseLayer
         Customers[(Customers and Segments)]
@@ -77,7 +79,10 @@ graph TD
     Dispatcher -- Webhooks --> ChannelSim
     SimLogic -- Callbacks --> Mutex
     
-    Routers -- Function Calling --> Gemini
+    AgentTools -- 1. Tool Requests --> Gemini
+    Gemini -- 2. Execute Function --> AgentTools
+    AgentTools -- 3. Query DB --> Customers
+    AgentTools -- 4. Formatted JSON --> Gemini
     Routers -- Context Polling --> Groq
 ```
 
