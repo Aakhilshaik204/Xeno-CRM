@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import {
   Activity, AlertTriangle, CheckCircle2, TrendingDown,
   Users, IndianRupee, Calendar, Zap, ChevronRight,
-  RefreshCw, ShoppingBag, Clock
+  RefreshCw, ShoppingBag, Clock, Search
 } from 'lucide-react'
 import Skeleton from '../components/Skeleton'
 
@@ -155,6 +155,13 @@ export default function ChurnAlertsPage() {
   const [alerts, setAlerts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'churning' | 'at_risk'>('all')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [visibleCount, setVisibleCount] = useState(20)
+
+  // Reset pagination when filter or search changes
+  useEffect(() => {
+    setVisibleCount(20)
+  }, [filter, searchQuery])
 
   const load = () => {
     setLoading(true)
@@ -172,7 +179,17 @@ export default function ChurnAlertsPage() {
 
   useEffect(() => { load() }, [])
 
-  const filtered = filter === 'all' ? alerts : alerts.filter(a => a.health.zone === filter)
+  let filtered = filter === 'all' ? alerts : alerts.filter(a => a.health.zone === filter)
+  
+  if (searchQuery.trim()) {
+    const q = searchQuery.toLowerCase()
+    filtered = filtered.filter(a => 
+      a.name.toLowerCase().includes(q) || 
+      a.email.toLowerCase().includes(q)
+    )
+  }
+
+  const visibleAlerts = filtered.slice(0, visibleCount)
 
   const handleAction = (customer: any) => {
     navigate(`/agent?prompt=${encodeURIComponent(`Target exactly this customer by name: ${customer.name} for a personalised win-back ${customer.membershipTier !== 'None' ? 'email' : 'SMS'}. They last ordered ${customer.daysSinceOrder ?? 'a while'} days ago and are a ${customer.membershipTier} member.`)}`)
@@ -248,21 +265,35 @@ export default function ChurnAlertsPage() {
 
       {/* Alert list */}
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
           <div>
             <h3 className="font-semibold text-base">Churn Alerts</h3>
             {!loading && <p className="text-xs text-text-muted mt-0.5">{filtered.length} customers need attention</p>}
           </div>
-          <div className="flex items-center bg-surfaceHighlight border border-border rounded-lg overflow-hidden text-xs">
-            {(['all', 'churning', 'at_risk'] as const).map(f => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`px-3 py-2 font-medium transition-colors ${filter === f ? 'bg-primary text-white' : 'text-text-muted hover:text-text'}`}
-              >
-                {f === 'all' ? 'All' : f === 'churning' ? 'Churning' : 'At Risk'}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+              <input
+                type="text"
+                placeholder="Search customers..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="pl-9 pr-4 py-2 w-full md:w-64 bg-surface border border-border rounded-lg text-sm focus:outline-none focus:border-primary transition-colors"
+              />
+            </div>
+            
+            <div className="flex items-center bg-surfaceHighlight border border-border rounded-lg overflow-hidden text-xs shrink-0">
+              {(['all', 'churning', 'at_risk'] as const).map(f => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className={`px-3 py-2 font-medium transition-colors ${filter === f ? 'bg-primary text-white' : 'text-text-muted hover:text-text'}`}
+                >
+                  {f === 'all' ? 'All' : f === 'churning' ? 'Churning' : 'At Risk'}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -278,9 +309,20 @@ export default function ChurnAlertsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {filtered.map(customer => (
+            {visibleAlerts.map(customer => (
               <AlertCard key={customer.id} customer={customer} onAction={handleAction} />
             ))}
+            
+            {visibleCount < filtered.length && (
+              <div className="pt-4 flex justify-center">
+                <button
+                  onClick={() => setVisibleCount(c => c + 20)}
+                  className="px-4 py-2 bg-surface border border-border text-text-muted hover:text-text hover:border-primary rounded-lg text-sm font-medium transition-colors"
+                >
+                  Load {Math.min(20, filtered.length - visibleCount)} more
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

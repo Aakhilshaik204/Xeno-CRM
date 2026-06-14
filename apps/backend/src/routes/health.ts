@@ -152,9 +152,8 @@ router.get('/alerts', asyncHandler(async (_req, res) => {
 
   // Return only at-risk and churning, sorted by score ascending (worst first)
   const alerts = scored
-    .filter(c => c.health.score < 60)
+    .filter(c => c.health.zone !== 'healthy')
     .sort((a, b) => a.health.score - b.health.score)
-    .slice(0, limit)
     .map(c => {
       const daysSince = c.lastOrderDate
         ? Math.floor((Date.now() - new Date(c.lastOrderDate).getTime()) / 86400000)
