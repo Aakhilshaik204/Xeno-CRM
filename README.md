@@ -84,38 +84,57 @@ graph TD
 ### 🧠 XenoAI Agent Execution Flow
 
 ```mermaid
-sequenceDiagram
-    participant User as React Frontend
-    participant API as Express API (/api/agent/chat)
-    participant Gemini as Google Gemini 1.5 Pro
-    participant DB as Supabase PostgreSQL
+graph TD
+    classDef frontend fill:#3b82f6,stroke:#1e3a8a,stroke-width:2px,color:#fff;
+    classDef backend fill:#10b981,stroke:#065f46,stroke-width:2px,color:#fff;
+    classDef ai fill:#8b5cf6,stroke:#4c1d95,stroke-width:2px,color:#fff;
+    classDef db fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:#fff;
 
-    User->>API: POST /chat (User Prompt: "Draft VIP Campaign")
+    User([User Prompt]) -- POST /api/agent/chat --> API[Express API]
+    class API backend;
     
-    rect rgb(20, 30, 40)
-        Note over API,Gemini: AI Orchestration Phase
-        API->>Gemini: Inject System Prompt + History
-        API->>Gemini: Send User Prompt
-        Gemini-->>API: Tool Request: getSegments()
-        API->>DB: SELECT * FROM Segment LIMIT 10
-        DB-->>API: Array of Segments
-        API->>Gemini: Tool Response (JSON)
-        
-        Gemini-->>API: Tool Request: createDraftCampaign()
-        API->>DB: INSERT INTO Campaign (status: 'draft')
-        DB-->>API: Return Campaign ID & Target Count
-        API->>Gemini: Tool Response (JSON)
+    API -- Prompt and Context --> Gemini{Gemini 1.5 Pro}
+    class Gemini ai;
+    
+    Gemini -- Needs Data or Action --> ToolRouter{Tool Router}
+    class ToolRouter backend;
+    
+    subgraph AgentToolsLayer
+        getSegments[getSegments]
+        createSegment[createSegment]
+        predict[predictCampaignOutcome]
+        draft[createDraftCampaign]
+        revenue[revenueReport]
     end
+    class getSegments,createSegment,predict,draft,revenue backend;
     
-    Gemini-->>API: Final Structured Output (JSON Object)
+    ToolRouter -- Query Audiences --> getSegments
+    ToolRouter -- Build Filters --> createSegment
+    ToolRouter -- Heuristics --> predict
+    ToolRouter -- Save to DB --> draft
+    ToolRouter -- Calculate ROI --> revenue
     
-    rect rgb(20, 40, 30)
-        Note over API,User: Frontend Rendering Pipeline
-        API-->>User: Return { lastStructured: { type: 'draft', data: {...} } }
-        User->>User: Parse JSON Payload
-        User->>User: Map type 'draft' to <PredictionPanel />
-        User->>User: Render Recharts Gauge & Dispatch Buttons
-    end
+    DB[(Supabase DB)]
+    class DB db;
+
+    getSegments --> DB
+    createSegment --> DB
+    predict --> DB
+    draft --> DB
+    revenue --> DB
+    
+    DB -- Raw SQL Results --> Format[Data Formatter]
+    class Format backend;
+
+    Format -- Tool Result JSON --> Gemini
+    
+    Gemini -- Final Analysis --> Output{Structured Output JSON}
+    class Output ai;
+    
+    Output -- type: draft --> UI1[React: Interactive Prediction Panel]
+    Output -- type: segment --> UI2[React: Audience Data Grid]
+    Output -- type: text --> UI3[React: Standard Chat Bubble]
+    class UI1,UI2,UI3 frontend;
 ```
 
 ### 1.1 Frontend (`apps/frontend`)
