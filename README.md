@@ -50,9 +50,9 @@ graph TD
         Stats[(CampaignStats and SegmentStats)]
         Orders[(Orders and Revenue)]
         
-        Customers <.-.> Campaigns
-        Campaigns <.-.> Stats
-        Customers <.-.> Orders
+        Customers --- Campaigns
+        Campaigns --- Stats
+        Customers --- Orders
     end
     class Customers,Campaigns,Stats,Orders db;
 
