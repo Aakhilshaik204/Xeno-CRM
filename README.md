@@ -21,7 +21,7 @@ graph TD
     classDef ai fill:#8b5cf6,stroke:#4c1d95,stroke-width:2px,color:#fff;
     classDef service fill:#f43f5e,stroke:#9f1239,stroke-width:2px,color:#fff;
 
-    subgraph Client [React Frontend Layer]
+    subgraph React_Frontend_Layer
         Router[React Router DOM]
         State[Local React State / Context]
         UI[Glassmorphic UI Components]
@@ -31,9 +31,9 @@ graph TD
         State --> UI
         UI --> Charts
     end
-    class Client,Router,State,UI,Charts frontend;
+    class Router,State,UI,Charts frontend;
 
-    subgraph API_Layer [Express Backend Core]
+    subgraph Express_Backend_Core
         AuthMiddleware[Clerk Auth Middleware]
         Routers[Express Routers: /api/*]
         Mutex[PQueue Mutex: concurrency 1]
@@ -43,9 +43,9 @@ graph TD
         Routers --> Mutex
         Routers --> Dispatcher
     end
-    class API_Layer,AuthMiddleware,Routers,Mutex,Dispatcher backend;
+    class AuthMiddleware,Routers,Mutex,Dispatcher backend;
 
-    subgraph Database [Supabase PostgreSQL]
+    subgraph Supabase_PostgreSQL
         Customers[(Customers & Segments)]
         Campaigns[(Campaigns & Comms)]
         Stats[(CampaignStats & SegmentStats)]
@@ -55,9 +55,9 @@ graph TD
         Campaigns <.-.> Stats
         Customers <.-.> Orders
     end
-    class Database,Customers,Campaigns,Stats,Orders db;
+    class Customers,Campaigns,Stats,Orders db;
 
-    subgraph External_Services [Microservices & AI]
+    subgraph Microservices_and_AI
         ChannelSim[Channel Simulator Service]
         SimLogic[Probabilistic Funnel Simulator]
         Gemini[Google Gemini 1.5 Pro]
@@ -65,7 +65,7 @@ graph TD
         
         ChannelSim --> SimLogic
     end
-    class External_Services,ChannelSim,SimLogic service;
+    class ChannelSim,SimLogic service;
     class Gemini,Groq ai;
 
     %% Connections
