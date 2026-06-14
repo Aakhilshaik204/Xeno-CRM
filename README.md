@@ -14,17 +14,16 @@ The project is structured as a Turborepo monorepo with three interconnected appl
 
 ```mermaid
 graph TD
-    %% Define Styles
     classDef frontend fill:#3b82f6,stroke:#1e3a8a,stroke-width:2px,color:#fff;
     classDef backend fill:#10b981,stroke:#065f46,stroke-width:2px,color:#fff;
     classDef db fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:#fff;
     classDef ai fill:#8b5cf6,stroke:#4c1d95,stroke-width:2px,color:#fff;
     classDef service fill:#f43f5e,stroke:#9f1239,stroke-width:2px,color:#fff;
 
-    subgraph React_Frontend_Layer
+    subgraph ClientLayer
         Router[React Router DOM]
-        State[Local React State / Context]
-        UI[Glassmorphic UI Components]
+        State[Local React State]
+        UI[Glassmorphic UI]
         Charts[Recharts Visualizations]
         
         Router --> UI
@@ -33,11 +32,11 @@ graph TD
     end
     class Router,State,UI,Charts frontend;
 
-    subgraph Express_Backend_Core
+    subgraph APILayer
         AuthMiddleware[Clerk Auth Middleware]
-        Routers[Express Routers: /api/*]
-        Mutex[PQueue Mutex: concurrency 1]
-        Dispatcher[Campaign Dispatcher: PQueue]
+        Routers[Express Routers]
+        Mutex[PQueue Mutex]
+        Dispatcher[Campaign Dispatcher]
         
         AuthMiddleware --> Routers
         Routers --> Mutex
@@ -45,11 +44,11 @@ graph TD
     end
     class AuthMiddleware,Routers,Mutex,Dispatcher backend;
 
-    subgraph Supabase_PostgreSQL
-        Customers[(Customers & Segments)]
-        Campaigns[(Campaigns & Comms)]
-        Stats[(CampaignStats & SegmentStats)]
-        Orders[(Orders & Revenue)]
+    subgraph DatabaseLayer
+        Customers[(Customers and Segments)]
+        Campaigns[(Campaigns and Comms)]
+        Stats[(CampaignStats and SegmentStats)]
+        Orders[(Orders and Revenue)]
         
         Customers <.-.> Campaigns
         Campaigns <.-.> Stats
@@ -57,30 +56,29 @@ graph TD
     end
     class Customers,Campaigns,Stats,Orders db;
 
-    subgraph Microservices_and_AI
-        ChannelSim[Channel Simulator Service]
-        SimLogic[Probabilistic Funnel Simulator]
-        Gemini[Google Gemini 1.5 Pro]
-        Groq[Groq Llama 3.1]
+    subgraph MicroservicesLayer
+        ChannelSim[Channel Simulator]
+        SimLogic[Funnel Simulator]
+        Gemini[Google Gemini Engine]
+        Groq[Groq Llama Engine]
         
         ChannelSim --> SimLogic
     end
     class ChannelSim,SimLogic service;
     class Gemini,Groq ai;
 
-    %% Connections
-    UI -- "REST / JWT Bearer" --> AuthMiddleware
+    UI -- REST API --> AuthMiddleware
     
-    Routers -- "Atomic R-M-W" --> Stats
-    Routers -- "Raw Supabase Queries" --> Customers
-    Routers -- "Batch Inserts" --> Campaigns
-    Mutex -- "Atomic Safety" --> Stats
+    Routers -- Atomic Math --> Stats
+    Routers -- SQL Queries --> Customers
+    Routers -- Batch Inserts --> Campaigns
+    Mutex -- Atomic Safety --> Stats
     
-    Dispatcher -- "Axios POST /send (Batch)" --> ChannelSim
-    SimLogic -- "Axios POST /receipts (Webhooks)" --> Mutex
+    Dispatcher -- Webhooks --> ChannelSim
+    SimLogic -- Callbacks --> Mutex
     
-    Routers -- "Tool-Calling Prompts" --> Gemini
-    Routers -- "Context Polling (5m)" --> Groq
+    Routers -- Function Calling --> Gemini
+    Routers -- Context Polling --> Groq
 ```
 
 ### 🧠 XenoAI Agent Execution Flow
