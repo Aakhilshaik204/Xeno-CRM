@@ -14,52 +14,110 @@ The project is structured as a Turborepo monorepo with three interconnected appl
 
 ```mermaid
 graph TD
-    Client[React Frontend] -->|REST API + JWT| Backend[Express Backend]
-    Backend -->|Raw SQL| DB[(Supabase PostgreSQL)]
-    
-    subgraph Event Driven Lifecycle
-        Backend -->|Bulk POST /api/send| Channel[Channel Simulator]
-        Channel -.->|Delayed Simulation| Channel
-        Channel -->|Webhook /api/receipts/webhook| Backend
+    %% Define Styles
+    classDef frontend fill:#3b82f6,stroke:#1e3a8a,stroke-width:2px,color:#fff;
+    classDef backend fill:#10b981,stroke:#065f46,stroke-width:2px,color:#fff;
+    classDef db fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:#fff;
+    classDef ai fill:#8b5cf6,stroke:#4c1d95,stroke-width:2px,color:#fff;
+    classDef service fill:#f43f5e,stroke:#9f1239,stroke-width:2px,color:#fff;
+
+    subgraph Client [React Frontend Layer]
+        Router[React Router DOM]
+        State[Local React State / Context]
+        UI[Glassmorphic UI Components]
+        Charts[Recharts Visualizations]
+        
+        Router --> UI
+        State --> UI
+        UI --> Charts
     end
-    
-    subgraph Dual AI Ecosystem
-        Backend <-->|Function Calling| Gemini[Google Gemini 1.5 Pro]
-        Backend <-->|Fast JSON Polling| Groq[Groq Llama 3.1]
+    class Client,Router,State,UI,Charts frontend;
+
+    subgraph API_Layer [Express Backend Core]
+        AuthMiddleware[Clerk Auth Middleware]
+        Routers[Express Routers: /api/*]
+        Mutex[PQueue Mutex: concurrency 1]
+        Dispatcher[Campaign Dispatcher: PQueue]
+        
+        AuthMiddleware --> Routers
+        Routers --> Mutex
+        Routers --> Dispatcher
     end
+    class API_Layer,AuthMiddleware,Routers,Mutex,Dispatcher backend;
+
+    subgraph Database [Supabase PostgreSQL]
+        Customers[(Customers & Segments)]
+        Campaigns[(Campaigns & Comms)]
+        Stats[(CampaignStats & SegmentStats)]
+        Orders[(Orders & Revenue)]
+        
+        Customers <.-.> Campaigns
+        Campaigns <.-.> Stats
+        Customers <.-.> Orders
+    end
+    class Database,Customers,Campaigns,Stats,Orders db;
+
+    subgraph External_Services [Microservices & AI]
+        ChannelSim[Channel Simulator Service]
+        SimLogic[Probabilistic Funnel Simulator]
+        Gemini[Google Gemini 1.5 Pro]
+        Groq[Groq Llama 3.1]
+        
+        ChannelSim --> SimLogic
+    end
+    class External_Services,ChannelSim,SimLogic service;
+    class Gemini,Groq ai;
+
+    %% Connections
+    UI -- "REST / JWT Bearer" --> AuthMiddleware
+    
+    Routers -- "Atomic R-M-W" --> Stats
+    Routers -- "Raw Supabase Queries" --> Customers
+    Routers -- "Batch Inserts" --> Campaigns
+    Mutex -- "Atomic Safety" --> Stats
+    
+    Dispatcher -- "Axios POST /send (Batch)" --> ChannelSim
+    SimLogic -- "Axios POST /receipts (Webhooks)" --> Mutex
+    
+    Routers -- "Tool-Calling Prompts" --> Gemini
+    Routers -- "Context Polling (5m)" --> Groq
 ```
 
 ### 🧠 XenoAI Agent Execution Flow
 
 ```mermaid
-graph TD
-    User([User Prompt]) -->|POST /api/agent/chat| API[Express API]
-    API -->|Prompt + System Context| Gemini{Gemini 1.5 Pro Engine}
+sequenceDiagram
+    participant User as React Frontend
+    participant API as Express API (/api/agent/chat)
+    participant Gemini as Google Gemini 1.5 Pro
+    participant DB as Supabase PostgreSQL
+
+    User->>API: POST /chat (User Prompt: "Draft VIP Campaign")
     
-    Gemini -->|Needs Data/Action?| ToolRouter{Tool Router}
-    
-    subgraph Available Agent Tools
-        ToolRouter -->|Query Audiences| getSegments[getSegments]
-        ToolRouter -->|Build Filter logic| createSegment[createSegment]
-        ToolRouter -->|Math Heuristics| predict[predictCampaignOutcome]
-        ToolRouter -->|Save to DB| draft[createDraftCampaign]
-        ToolRouter -->|Calculate ROI| revenue[revenueReport]
+    rect rgb(20, 30, 40)
+        Note over API,Gemini: AI Orchestration Phase
+        API->>Gemini: Inject System Prompt + History
+        API->>Gemini: Send User Prompt
+        Gemini-->>API: Tool Request: getSegments()
+        API->>DB: SELECT * FROM Segment LIMIT 10
+        DB-->>API: Array of Segments
+        API->>Gemini: Tool Response (JSON)
+        
+        Gemini-->>API: Tool Request: createDraftCampaign()
+        API->>DB: INSERT INTO Campaign (status: 'draft')
+        DB-->>API: Return Campaign ID & Target Count
+        API->>Gemini: Tool Response (JSON)
     end
     
-    getSegments --> DB[(Supabase DB)]
-    createSegment --> DB
-    predict --> DB
-    draft --> DB
-    revenue --> DB
+    Gemini-->>API: Final Structured Output (JSON Object)
     
-    DB -->|Raw SQL Results| Format[Data Formatter]
-    Format -->|Tool Result JSON| Gemini
-    
-    Gemini -->|Final Analysis| Output{Structured Output}
-    
-    Output -->|type: 'draft'| UI1[React: Interactive Prediction Panel]
-    Output -->|type: 'segment'| UI2[React: Audience Data Grid]
-    Output -->|type: 'text'| UI3[React: Standard Chat Bubble]
+    rect rgb(20, 40, 30)
+        Note over API,User: Frontend Rendering Pipeline
+        API-->>User: Return { lastStructured: { type: 'draft', data: {...} } }
+        User->>User: Parse JSON Payload
+        User->>User: Map type 'draft' to <PredictionPanel />
+        User->>User: Render Recharts Gauge & Dispatch Buttons
+    end
 ```
 
 ### 1.1 Frontend (`apps/frontend`)
